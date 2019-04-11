@@ -3,8 +3,8 @@
 # Provided code assumes Java 8
 JAVAC=javac
 JAVA=java
-ANTLRJAR=/home/akeen/public/antlr4/antlr-4.7.1-complete.jar
-JSONJAR=/home/akeen/public/javax.json-1.0.4.jar
+ANTLRJAR=../libraries/antlr-4.7.1-complete.jar
+JSONJAR=../libraries/public/javax.json-1.0.4.jar
 
 CLASSPATH_MOD=$(ANTLRJAR):$(JSONJAR)
 
