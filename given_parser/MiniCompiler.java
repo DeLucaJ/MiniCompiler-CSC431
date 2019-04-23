@@ -34,6 +34,8 @@ public class MiniCompiler
          MiniToAstProgramVisitor programVisitor =
             new MiniToAstProgramVisitor();
          ast.Program program = programVisitor.visit(tree);
+
+         // Milestone 1 
       }
    }
 
