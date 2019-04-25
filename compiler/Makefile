@@ -22,4 +22,4 @@ antlr.generated : Mini.g4
 	touch antlr.generated
 
 clean:
-	\rm -rf *generated* ${GENERATED} *.class ast/*.class visitor/*.class
+	rm -rf *generated* ${GENERATED} *.class ast/*.class visitor/*.class
