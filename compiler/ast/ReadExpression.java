@@ -11,8 +11,8 @@ public class ReadExpression
    }
 
    // Landing for visitor
-   public <T> T accept (ExpressionVisitor<T> visitor)
+   public <T> T accept (ExpressionVisitor<T> visitor, State state)
    {
-      return visitor.visit(this);
+      return visitor.visit(this, state);
    }
 }

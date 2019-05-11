@@ -11,8 +11,8 @@ public class ReturnEmptyStatement
    }
 
    //Landing for visitor
-   public <T> T accept(StatementVisitor<T> visitor)
+   public <T> T accept(StatementVisitor<T> visitor, State state)
    {
-      return visitor.visit(this);
+      return visitor.visit(this, state);
    }
 }

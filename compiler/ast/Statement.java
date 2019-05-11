@@ -5,5 +5,5 @@ import visitor.*;
 public interface Statement
 {
     //Landing for Visitor
-    public <T> T accept (StatementVisitor<T> visitor);
+    public <T> T accept (StatementVisitor<T> visitor, State state);
 }
