@@ -4,6 +4,8 @@ import ast.*;
 
 public class SemanticStatementVisitor implements StatementVisitor<Void>
 {
+    public SemanticStatementVisitor(){}
+
     public Void visit (AssignmentStatement statement, State state)
     {
         return null;

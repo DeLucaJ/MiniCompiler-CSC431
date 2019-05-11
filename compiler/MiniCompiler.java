@@ -35,7 +35,7 @@ public class MiniCompiler
             new MiniToAstProgramVisitor();
          ast.Program program = programVisitor.visit(tree);
 
-         // Milestone 1 
+         // Milestone 1 - Semantic Analysis
       }
    }
 

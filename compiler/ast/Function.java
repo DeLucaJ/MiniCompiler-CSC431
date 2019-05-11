@@ -1,6 +1,7 @@
 package ast;
 
-import java.util.List;
+import java.util.*;
+import visitor.*;
 
 public class Function
 {
@@ -20,5 +21,21 @@ public class Function
       this.retType = retType;
       this.locals = locals;
       this.body = body;
+   }
+
+   public void define(State state)
+   {
+      List<Type> typeParams = new ArrayList<Type>(this.params.size());
+      for (Declaration param : this.params)
+      {
+         typeParams.add(param.getType());
+      }
+      state.addFunction(this.name, this.retType, typeParams);
+   }
+
+   public void analyze(State state)
+   {
+      SemanticStatementVisitor visitor = new SemanticStatementVisitor();
+      body.accept(visitor, state);
    }
 }

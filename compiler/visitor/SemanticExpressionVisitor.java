@@ -5,6 +5,8 @@ import java.io.*;
 
 public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
 {
+    public SemanticExpressionVisitor(){}
+
     public Type visit (BinaryExpression expression, State state)
     {
         return null;

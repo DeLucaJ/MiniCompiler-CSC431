@@ -5,8 +5,10 @@ import java.util.*;
 
 public class State
 {
+    //fields act as namespaces in the state
     public LinkedList<Hashtable<String, Type>> symbols;
-    public Hashtable<String, Hashtable<String, Type>> structs; 
+    public Hashtable<String, Hashtable<String, Type>> structs;
+    public Hashtable<String, FunctionType> funcs;
 
     public State()
     {
@@ -56,5 +58,11 @@ public class State
     public void addPropertyToStruct(String structID, String propertyID, Type type)
     {
         this.structs.get(structID).put(propertyID, type);
+    }
+
+    public void addFunction(String funcID, Type retType, List<Type> params)
+    {
+        FunctionType func = new FunctionType(retType, params);
+        this.funcs.put(funcID, func);    
     }
 }

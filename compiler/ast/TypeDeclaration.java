@@ -1,6 +1,7 @@
 package ast;
 
-import java.util.List;
+import java.util.*;
+import visitor.*;
 
 public class TypeDeclaration
 {
@@ -13,5 +14,14 @@ public class TypeDeclaration
       this.lineNum = lineNum;
       this.name = name;
       this.fields = fields;
+   }
+
+   public void define(State state)
+   {
+      state.structs.put(this.name, new Hashtable<String, Type>());
+      for (Declaration field : fields)
+      {
+         field.defineField(this.name, state);
+      }
    }
 }
