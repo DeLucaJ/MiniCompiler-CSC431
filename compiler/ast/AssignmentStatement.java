@@ -20,4 +20,14 @@ public class AssignmentStatement
    {
       return visitor.visit(this, state);
    }
+
+   /*public LValue getTarget()
+   {
+      return this.target;
+   }
+
+   public Expression getSource()
+   {
+      return this.source;
+   }*/
 }

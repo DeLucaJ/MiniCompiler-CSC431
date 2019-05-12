@@ -15,6 +15,10 @@ public class UnaryExpression
       this.operand = operand;
    }
 
+   public Expression getOperand(){ return this.operand; }
+
+   public Operator getOperator(){ return this.operator; }
+
    // Landing for visitor
    public <T> T accept (ExpressionVisitor<T> visitor, State state)
    {

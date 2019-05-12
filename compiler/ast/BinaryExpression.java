@@ -18,6 +18,12 @@ public class BinaryExpression
       this.right = right;
    }
 
+   public Expression getLeft() { return this.left; }
+
+   public Expression getRight() { return this.right; }
+
+   public Operator getOperator() { return this.operator; }
+
    // Landing for visitor
    public <T> T accept (ExpressionVisitor<T> visitor, State state)
    {

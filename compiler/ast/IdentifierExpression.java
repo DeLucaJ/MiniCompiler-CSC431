@@ -18,4 +18,6 @@ public class IdentifierExpression
    {
       return visitor.visit(this, state);
    }
+
+   public String getId(){ return this.id; }
 }

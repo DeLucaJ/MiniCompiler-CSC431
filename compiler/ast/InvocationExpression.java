@@ -22,4 +22,8 @@ public class InvocationExpression
    {
       return visitor.visit(this, state);
    }
+
+   public String getName(){ return this.name; }
+
+   public List<Expression> getArguments(){ return this.arguments; }
 }

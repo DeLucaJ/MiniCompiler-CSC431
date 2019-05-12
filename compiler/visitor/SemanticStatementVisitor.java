@@ -4,10 +4,36 @@ import ast.*;
 
 public class SemanticStatementVisitor implements StatementVisitor<Void>
 {
-    public SemanticStatementVisitor(){}
+    private SemanticExpressionVisitor expVisitor;
+
+    public SemanticStatementVisitor()
+    {
+        this.expVisitor = new SemanticExpressionVisitor();
+    }
 
     public Void visit (AssignmentStatement statement, State state)
     {
+        //handle target
+        /*Type targetType;
+        LValue target = statement.getTarget();
+        if (target instanceof LValueDot)
+        {
+            Expression leftExp = target.getLeft().accept(expVisitor, state);
+            Type fieldType = 
+        }
+        else if (target instanceof LValueId)
+        {
+
+        }
+        else
+        {
+            //this should be impossible
+        }*/
+
+        //handle source
+
+        //check if they match
+
         return null;
     }
     

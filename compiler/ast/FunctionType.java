@@ -12,4 +12,8 @@ public class FunctionType implements Type
         this.retType = retType;
         this.paramTypes = paramTypes;
     } 
+
+    public Type getRetType(){ return this.retType; }
+
+    public Type getParamTypes(){ return this.paramTypes; }
 }

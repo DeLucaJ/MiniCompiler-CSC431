@@ -15,6 +15,10 @@ public class DotExpression
       this.id = id;
    }
 
+   public Expression getLeft() { return this.left; }
+
+   public String getId() { return this.id; }
+
    //Landing for visitor
    public <T> T accept (ExpressionVisitor<T> visitor, State state)
    {
