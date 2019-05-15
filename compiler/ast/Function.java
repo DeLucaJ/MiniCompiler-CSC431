@@ -25,17 +25,23 @@ public class Function
 
    public void define(State state)
    {
-      List<Type> typeParams = new ArrayList<Type>(this.params.size());
+      state.addFunction(this.name, this.funcType());
+   }
+
+   public FunctionType funcType()
+   {
+      List<Type> paramTypes = new ArrayList<Type>(this.params.size());
       for (Declaration param : this.params)
       {
-         typeParams.add(param.getType());
+         paramTypes.add(param.getType());
       }
-      state.addFunction(this.name, this.retType, typeParams);
+      return new FunctionType(this.retType, paramTypes);
    }
 
    public void analyze(State state)
    {
       SemanticStatementVisitor visitor = new SemanticStatementVisitor();
+      state.currentFunc = this.funcType();
       body.accept(visitor, state);
    }
 }

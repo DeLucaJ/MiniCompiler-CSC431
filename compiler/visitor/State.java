@@ -1,6 +1,7 @@
 package visitor;
 
 import ast.*;
+
 import java.util.*;
 
 public class State
@@ -9,6 +10,7 @@ public class State
     public LinkedList<Hashtable<String, Type>> symbols;
     public Hashtable<String, Hashtable<String, Type>> structs;
     public Hashtable<String, FunctionType> funcs;
+    public FunctionType currentFunc;
 
     public State()
     {
@@ -60,9 +62,8 @@ public class State
         this.structs.get(structID).put(propertyID, type);
     }
 
-    public void addFunction(String funcID, Type retType, List<Type> params)
+    public void addFunction(String funcID, FunctionType func)
     {
-        FunctionType func = new FunctionType(retType, params);
         this.funcs.put(funcID, func);    
     }
 }

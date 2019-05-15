@@ -1,10 +1,9 @@
 package visitor;
 
 import ast.*;
-import sun.tools.java.BinaryExceptionHandler;
-import sun.tools.tree.UnaryExpression;
 
 import java.io.*;
+import java.util.*;
 
 public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
 {
@@ -86,13 +85,13 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
     public Type visit (IdentifierExpression expression, State state)
     {
         String id = expression.getId();
-        return state.symbols.getType(id);
+        return state.getType(id);
     }
     
     public Type visit (InvocationExpression expression, State state)
     {
         String name = expression.getName();
-        List<Type> arguments;
+        List<Type> arguments = new ArrayList<Type>();
         expression.getArguments().forEach(
             (exp) -> { arguments.add(exp.accept(this, state)); }
         );
@@ -128,12 +127,12 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
     
     public Type visit (NullExpression expression, State state)
     {
-        return new NullType();
+        return new VoidType();
     }
     
     public Type visit (ReadExpression expression, State state)
     {
-        return null;
+        return new IntType(); //Read expresion reads a number
     }
     
     public Type visit (TrueExpression expression, State state)
@@ -146,17 +145,23 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
         UnaryExpression.Operator operator = expression.getOperator();
         Type operand = expression.getOperand().accept(this, state);
 
-        switch (operator)
+        if (
+            operator == UnaryExpression.Operator.NOT && 
+            operand instanceof BoolType
+            )
         {
-            case UnaryExpression.Operator.NOT:
-                if (operand instanceof BoolType) return new BoolType();
-                break;
-            case UnaryExpression.Operator.MINUS:
-                if (opeand instanceof IntType) return new IntType();
-                break;
-            default:
-                return null;
-                break;
+            return new BoolType();
+        }
+        else if (
+            operator == UnaryExpression.Operator.MINUS &&
+            operand instanceof IntType
+        )
+        {
+            return new IntType();
+        }
+        else 
+        {
+            return null;
         }
     }
 }
