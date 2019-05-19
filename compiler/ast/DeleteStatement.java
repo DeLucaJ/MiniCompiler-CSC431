@@ -18,4 +18,9 @@ public class DeleteStatement
    {
       return visitor.visit(this, state);
    }
+
+   public Expression getExpression()
+   {
+      return this.expression;
+   }
 }

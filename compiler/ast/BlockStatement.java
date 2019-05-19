@@ -25,4 +25,9 @@ public class BlockStatement
    {
       return visitor.visit(this, state);
    }
+
+   public List<Statement> getStatements()
+   {
+      return this.statements;
+   }
 }

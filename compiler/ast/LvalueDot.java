@@ -14,7 +14,7 @@ public class LvalueDot
       this.id = id;
    }
 
-   /*public Expression getLeft()
+   public Expression getLeft()
    {
       return this.left;
    }
@@ -22,5 +22,5 @@ public class LvalueDot
    public String getId()
    {
       return this.id;
-   }*/
+   }
 }

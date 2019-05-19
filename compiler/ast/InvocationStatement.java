@@ -19,4 +19,9 @@ public class InvocationStatement
    {
       return visitor.visit(this, state);
    }
+
+   public Expression getExpression()
+   {
+      return this.expression;
+   }
 }

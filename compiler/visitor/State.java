@@ -37,7 +37,7 @@ public class State
 
     public Type getType(String id)
     {
-        ListIterator<Hashtable<String, Type>> iterator = symbols.listIterator(0);
+        ListIterator<Hashtable<String, Type>> iterator = this.symbols.listIterator(0);
         Hashtable<String, Type> current;
         Type varType;
 

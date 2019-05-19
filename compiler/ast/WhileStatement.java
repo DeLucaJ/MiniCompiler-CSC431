@@ -20,4 +20,14 @@ public class WhileStatement
    {
       return visitor.visit(this, state);
    }
+
+   public Expression getGuard()
+   {
+      return this.guard;
+   }
+
+   public Statement getBody()
+   {
+      return this.body;
+   }
 }

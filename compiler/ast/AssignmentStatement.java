@@ -21,7 +21,7 @@ public class AssignmentStatement
       return visitor.visit(this, state);
    }
 
-   /*public LValue getTarget()
+   public Lvalue getTarget()
    {
       return this.target;
    }
@@ -29,5 +29,5 @@ public class AssignmentStatement
    public Expression getSource()
    {
       return this.source;
-   }*/
+   }
 }

@@ -23,4 +23,19 @@ public class ConditionalStatement
    {
       return visitor.visit(this, state);
    }
+
+   public Expression getGuard()
+   {
+      return this.guard;
+   }
+
+   public Statement getThen()
+   {
+      return this.thenBlock;
+   }
+
+   public Statement getElse()
+   {
+      return this.elseBlock;
+   }
 }
