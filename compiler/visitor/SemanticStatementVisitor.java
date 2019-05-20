@@ -15,28 +15,35 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
 
     public Void visit (AssignmentStatement statement, State state)
     {
-        /*LvalueDot dotTarget;
+        LvalueDot dotTarget;
         LvalueId idTarget;
         Type sourceType = statement.getSource().accept(expVisitor, state);
 
         //evalueate Lvalue of target
         if (statement.getTarget() instanceof LvalueDot)
         {
-            dotTarget = target;
-            //Need to fix getType() for finding structs
+            dotTarget = (LvalueDot) statement.getTarget();
+            Type leftType = dotTarget.getLeft().accept(this.expVisitor, state);
+            if (!(leftType instanceof StructType))
+            {
+                System.out.printf("Stuct Error (l:%d): Assignment Statement", statement.getLineNum());
+            }
+            StructType leftS = (StructType) leftType;
+            if (!state.structs.get(dotTarget.getId()).getClass().equals(sourceType.getClass()))
+            {
+                System.out.printf("Stuct Property Error (l:%d): Assignment Statement", statement.getLineNum());
+            }
+            //need to check to see if the left type evaluates to struct
         }
         else //instance of LvalueId
         {
-            idTarget = target;
+            idTarget = (LvalueId) statement.getTarget();
             Type targetType = state.getType(idTarget.getId());
             if (!targetType.getClass().equals(sourceType.getClass()))
             {
-                System.out.println("Type Error (l:%d): Assignment Statement", statement.getLineNum());
+                System.out.printf("Type Error (l:%d): Assignment Statement", statement.getLineNum());
             }
-        }*/
-
-        //compare their types
-
+        }
         return null;
     }
     
@@ -92,15 +99,24 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
     public Void visit (ReturnEmptyStatement statement, State state)
     {
         // make sure current func returns void/null
+        if (!state.currentFunc.getRetType().getClass().equals((new VoidType()).getClass()))
+        {
+            System.out.printf("Return Type Error (l:%d): Return Empty Statement\n", statement.getLineNum());
+        }
+
         return null;
     }
     
     public Void visit (ReturnStatement statement, State state)
     {
         //evaluate expression
-        statement.getExpression().accept(expVisitor, state);
+        Type rType = statement.getExpression().accept(expVisitor, state);
 
         //compare to retType of current Func
+        if (!state.currentFunc.getRetType().getClass().equals(rType.getClass()))
+        {
+            System.out.printf("Return Type Error (l:%d): Return Statement\n", statement.getLineNum());
+        }
 
         return null;
     }
