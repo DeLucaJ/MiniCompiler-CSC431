@@ -26,7 +26,7 @@ public class State
     public ErrorType addError(int linenum, String message)
     {
         ErrorType error = new ErrorType(linenum, message);
-        System.out.printf("%d: %s\n", linenum, message);
+        System.out.printf("%5d| %s\n", linenum, message);
         this.errors.add(error);
         return error;
     }
