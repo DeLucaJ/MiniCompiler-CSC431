@@ -103,13 +103,42 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
         Type left = expression.getLeft().accept(this, state);
 
         //left needs to be a struct type
-        if (!(left instanceof StructType)) {
-            return null;
+        if (left instanceof StructType) 
+        {
+            StructType leftS = (StructType) left;
+            if (state.structs.contains(leftS.getName()))
+            {
+                if (state.structs.get(leftS.getName()).contains(id))
+                {
+                    return state.structs.get(leftS.getName()).get(id);
+                }
+                else
+                {
+                    String message = String.format(
+                        "DotExpression Left Field Undefined Error: Field %s is undefined for Struct %s",
+                        id,
+                        leftS.getName()
+                    );
+                    return state.addError(expression.getLineNum(), message);
+                }
+            }
+            else
+            {
+                String message = String.format(
+                    "DotExpression Left Undefined Error: Struct %s is undefined",
+                    leftS.getName()
+                );
+                return state.addError(expression.getLineNum(), message);
+            }
         }
-
-        StructType leftS = (StructType) left;
-
-        return state.structs.get(leftS.getName()).get(id);
+        else
+        {
+            String message = String.format(
+                "DotExpression Left Error: Left is %s, not StructType",
+                left.getClass().getName()
+            );
+            return state.addError(expression.getLineNum(), message);
+        }
     }
 
     public Type visit (FalseExpression expression, State state)
@@ -133,11 +162,29 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
         FunctionType func = state.funcs.get(name);
         List<Type> params = func.getParamTypes();
 
-        if (params.size() != arguments.size()) return null;
+        if (params.size() != arguments.size()) 
+        { 
+            String message = String.format(
+                "Too Many Parameters Error: Arguments enterered %d, Paramters needed %d",
+                arguments.size(),
+                params.size()
+            );
+            return state.addError(expression.getLineNum(), message);
+        }
 
         for (int i = 0; i < params.size(); i++)
         {
-            if (!params.get(i).getClass().equals(arguments.get(i).getClass())) return null;
+            if (params.get(i).getClass().equals(arguments.get(i).getClass()))
+            {
+                continue;
+            }
+            else
+            {
+                String message = String.format(
+                    "Invocation Argument Does not Match: Arguments do not match types of parameters"
+                );
+                return state.addError(expression.getLineNum(), message);
+            }
         }
 
         return func.getRetType();

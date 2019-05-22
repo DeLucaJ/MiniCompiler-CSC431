@@ -17,6 +17,8 @@ public class State
     {
         this.symbols = new LinkedList<Hashtable<String, Type>>();
         this.structs = new Hashtable<String, Hashtable<String, Type>>();
+        this.funcs = new Hashtable<String, FunctionType>();
+        this.errors = new ArrayList<ErrorType>();
         //create global table
         this.symbols.push(new Hashtable<String, Type>());
     }
