@@ -42,6 +42,12 @@ public class Function
    {
       SemanticStatementVisitor visitor = new SemanticStatementVisitor();
       state.currentFunc = this.funcType();
+      state.pushTable();
+      //add params to state
+      for (Declaration param : this.params){ param.defineSymbol(state); }
+      //add locals to state
+      for (Declaration local : this.locals){ local.defineSymbol(state); }
       body.accept(visitor, state);
+      state.popTable();
    }
 }
