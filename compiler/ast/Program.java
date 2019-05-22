@@ -42,5 +42,10 @@ public class Program
          state.funcs.toString(),
          state.structs.containsKey("B")
       );*/
+
+      if (state.errors.size() == 0)
+      {
+         System.out.println("Success");
+      }
    }
 }
