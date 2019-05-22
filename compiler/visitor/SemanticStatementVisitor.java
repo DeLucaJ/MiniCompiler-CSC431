@@ -35,11 +35,14 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
             }
             StructType leftS = (StructType) leftType;
             //make sure dotTarget is a field in struct leftS
-            if (state.structs.contains(leftS.getName()))
+            if (state.structs.containsKey(leftS.getName()))
             {
-                if(state.structs.get(leftS.getName()).contains(dotTarget.getId()))
+                if(state.structs.get(leftS.getName()).containsKey(dotTarget.getId()))
                 {
-                    if (state.structs.get(leftS.getName()).getClass().equals(sourceType.getClass()))
+                    if (
+                        state.structs.get(leftS.getName()).get(dotTarget.getId()).getClass().equals(sourceType.getClass()) ||
+                        (state.structs.get(leftS.getName()).get(dotTarget.getId()) instanceof StructType && sourceType instanceof VoidType)
+                    )
                     {
                         return null;
                     }

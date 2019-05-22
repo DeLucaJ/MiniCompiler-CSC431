@@ -106,9 +106,9 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
         if (left instanceof StructType) 
         {
             StructType leftS = (StructType) left;
-            if (state.structs.contains(leftS.getName()))
+            if (state.structs.containsKey(leftS.getName()))
             {
-                if (state.structs.get(leftS.getName()).contains(id))
+                if (state.structs.get(leftS.getName()).containsKey(id))
                 {
                     return state.structs.get(leftS.getName()).get(id);
                 }
@@ -174,7 +174,11 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
 
         for (int i = 0; i < params.size(); i++)
         {
-            if (params.get(i).getClass().equals(arguments.get(i).getClass()))
+            if 
+            (
+                params.get(i).getClass().equals(arguments.get(i).getClass()) ||
+                (params.get(i) instanceof StructType && arguments.get(i) instanceof VoidType)
+            )
             {
                 continue;
             }
@@ -198,7 +202,7 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
     public Type visit (NewExpression expression, State state)
     {
         //throw error if structure does not exist in state
-        if (state.structs.contains(expression.getId()))
+        if (state.structs.containsKey(expression.getId()))
         {
             return new StructType(expression.getLineNum(), expression.getId());
         }

@@ -84,6 +84,6 @@ public class State
     public boolean containsFunction(String funcID)
     {
         //this throws a null pointer exception
-        return this.funcs.contains(funcID);
+        return this.funcs.containsKey(funcID);
     }
 }

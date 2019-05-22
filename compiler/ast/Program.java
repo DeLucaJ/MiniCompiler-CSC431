@@ -33,5 +33,14 @@ public class Program
 
       //analyze all funcs
       for (Function func : this.funcs){ func.analyze(state); }
+
+      //print relevant state stuff
+      /*System.out.printf(
+         "Symbols| %s\nStructs| %s\nFuncs  | %s\nContains B = %b", 
+         state.symbols.toString(),
+         state.structs.toString(),
+         state.funcs.toString(),
+         state.structs.containsKey("B")
+      );*/
    }
 }
