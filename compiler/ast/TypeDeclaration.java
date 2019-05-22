@@ -18,10 +18,21 @@ public class TypeDeclaration
 
    public void define(State state)
    {
-      state.structs.put(this.name, new Hashtable<String, Type>());
-      for (Declaration field : fields)
+      if (state.structs.contains(this.name))
       {
-         field.defineField(this.name, state);
+         String message = String.format(
+            "Struct Redeclaration Error: Attemt to redefine struct %s", 
+            this.name
+         );
+         state.addError(this.lineNum, message);
+      }
+      else
+      {
+         state.structs.put(this.name, new Hashtable<String, Type>());
+         for (Declaration field : fields)
+         {
+            field.defineField(this.name, state);
+         }
       }
    }
 }

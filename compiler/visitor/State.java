@@ -10,6 +10,7 @@ public class State
     public LinkedList<Hashtable<String, Type>> symbols;
     public Hashtable<String, Hashtable<String, Type>> structs;
     public Hashtable<String, FunctionType> funcs;
+    public ArrayList<ErrorType> errors;
     public FunctionType currentFunc;
 
     public State()
@@ -18,6 +19,14 @@ public class State
         this.structs = new Hashtable<String, Hashtable<String, Type>>();
         //create global table
         this.symbols.push(new Hashtable<String, Type>());
+    }
+
+    public ErrorType addError(int linenum, String message)
+    {
+        ErrorType error = new ErrorType(linenum, message);
+        System.out.printf("%d: %s\n", linenum, message);
+        this.errors.add(error);
+        return error;
     }
 
     public Hashtable<String, Type> globalTable()
@@ -35,7 +44,7 @@ public class State
         this.symbols.pop();
     }
 
-    public Type getType(String id)
+    public Type getType(int linenum, String id)
     {
         ListIterator<Hashtable<String, Type>> iterator = this.symbols.listIterator(0);
         Hashtable<String, Type> current;
@@ -49,7 +58,10 @@ public class State
             if(varType != null){ return varType; }
         }
         //variable is not defined
-        return null;
+        String message = String.format(
+            "Undefined ID Error: ID %s is undefined", id
+        );
+        return this.addError(linenum, message);
     }
 
     public void addStruct(String id)
@@ -65,5 +77,11 @@ public class State
     public void addFunction(String funcID, FunctionType func)
     {
         this.funcs.put(funcID, func);    
+    }
+
+    public boolean containsFunction(String funcID)
+    {
+        //this throws a null pointer exception
+        return this.funcs.contains(funcID);
     }
 }

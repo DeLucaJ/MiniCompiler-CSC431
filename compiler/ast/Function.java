@@ -25,7 +25,18 @@ public class Function
 
    public void define(State state)
    {
-      state.addFunction(this.name, this.funcType());
+      if (state.containsFunction(this.name))
+      {
+         String message = String.format(
+            "Function Redeclaration Error: Attemt to redefine function %s", 
+            this.name
+         );
+         state.addError(this.lineNum, message);
+      }
+      else 
+      {
+         state.addFunction(this.name, this.funcType());
+      }
    }
 
    public FunctionType funcType()

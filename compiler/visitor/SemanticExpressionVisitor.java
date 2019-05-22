@@ -26,6 +26,15 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
             {
                 return new IntType();
             }
+            else
+            {
+                String message = String.format(
+                    "Binary Arithmetic Expression Type Error: Left is %s, Right is type %s",
+                    left.getClass().getName(),
+                    right.getClass().getName() 
+                );
+                return state.addError(expression.getLineNum(), message);
+            }
         }
         else if (
             op == BinaryExpression.Operator.LT ||
@@ -38,6 +47,15 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
             {
                 return new BoolType();
             }
+            else
+            {
+                String message = String.format(
+                    "Binary Relational Expression Type Error: Left is %s, Right is type %s",
+                    left.getClass().getName(),
+                    right.getClass().getName() 
+                );
+                return state.addError(expression.getLineNum(), message);
+            }
         }
         else if (
             op == BinaryExpression.Operator.EQ ||
@@ -49,6 +67,15 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
             {
                 return new BoolType();
             }
+            else
+            {
+                String message = String.format(
+                    "Binary Equality Expression Type Error: Left is %s, Right is type %s",
+                    left.getClass().getName(),
+                    right.getClass().getName() 
+                );
+                return state.addError(expression.getLineNum(), message);
+            }
         }
         else
         {
@@ -57,8 +84,16 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
             {
                 return new BoolType();
             }
+            else
+            {
+                String message = String.format(
+                    "Binary Boolean Expression Type Error: Left is %s, Right is type %s",
+                    left.getClass().getName(),
+                    right.getClass().getName() 
+                );
+                return state.addError(expression.getLineNum(), message);
+            }
         }
-        return null;
     }
 
     // Likely needs to check for a value in table
@@ -85,7 +120,7 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
     public Type visit (IdentifierExpression expression, State state)
     {
         String id = expression.getId();
-        return state.getType(id);
+        return state.getType(expression.getLineNum(), id);
     }
     
     public Type visit (InvocationExpression expression, State state)
@@ -115,14 +150,19 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
 
     public Type visit (NewExpression expression, State state)
     {
-        String id = expression.getId();
-
-        if (state.structs.contains(id))
+        //throw error if structure does not exist in state
+        if (state.structs.contains(expression.getId()))
         {
-            return new StructType(expression.getLineNum(), id);
+            return new StructType(expression.getLineNum(), expression.getId());
         }
-
-        return null;
+        else 
+        {
+            String message = String.format(
+               "New Expression Type Error: Attempt to Allocate undefined type %s",
+               expression.getId() 
+            );
+            return state.addError(expression.getLineNum(), message);
+        }
     }
     
     public Type visit (NullExpression expression, State state)
@@ -145,23 +185,35 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
         UnaryExpression.Operator operator = expression.getOperator();
         Type operand = expression.getOperand().accept(this, state);
 
-        if (
-            operator == UnaryExpression.Operator.NOT && 
-            operand instanceof BoolType
-            )
+        if (operator == UnaryExpression.Operator.NOT)
         {
-            return new BoolType();
+            if (operand instanceof BoolType)
+            {
+                return new BoolType();
+            }
+            else
+            {
+                String message = String.format(
+                    "Unary Boolean Expression Type Error: Operand is %s not BoolType",
+                    operand.getClass().getName()
+                );
+                return state.addError(expression.getLineNum(), message);
+            }
         }
-        else if (
-            operator == UnaryExpression.Operator.MINUS &&
-            operand instanceof IntType
-        )
+        else
         {
-            return new IntType();
-        }
-        else 
-        {
-            return null;
+            if (operand instanceof IntType)
+            {
+                return new IntType();
+            }
+            else
+            {
+                String message = String.format(
+                    "Unary Integer Expression Type Error: Operand is %s not IntType",
+                    operand.getClass().getName()
+                );
+                return state.addError(expression.getLineNum(), message);
+            }
         }
     }
 }

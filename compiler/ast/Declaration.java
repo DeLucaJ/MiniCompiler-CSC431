@@ -22,7 +22,22 @@ public class Declaration
 
    public void defineSymbol(State state)
    {
-      state.symbols.peek().put(this.name, this.type);
+      //check if the symbol already exists
+      if(state.symbols.peek().contains(this.name))
+      {
+         //already defined 
+         String message = String.format(
+            "Variable Redeclaration Error: Attemt to redefine variable %s of %s as %s", 
+            this.name, 
+            state.symbols.peek().get(this.name).getClass().getName(),
+            this.type.getClass().getName()
+         );
+         state.addError(this.lineNum, message);
+      }
+      else
+      {
+         state.symbols.peek().put(this.name, this.type);
+      }
    }
 
    public Type getType(){ return this.type; }

@@ -1,6 +1,9 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+import visitor.SemanticExpressionVisitor;
+import visitor.SemanticStatementVisitor;
+
 import java.io.*;
 import javax.json.JsonValue;
 
@@ -36,6 +39,7 @@ public class MiniCompiler
          ast.Program program = programVisitor.visit(tree);
 
          // Milestone 1 - Semantic Analysis
+         program.analyze();
       }
    }
 
