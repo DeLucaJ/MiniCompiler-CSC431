@@ -60,5 +60,28 @@ public class Function
       for (Declaration local : this.locals){ local.defineSymbol(state); }
       body.accept(visitor, state);
       state.popTable();
+      boolean returns = true;
+      if(!(this.retType instanceof VoidType))
+      {
+         if(this.body instanceof BlockStatement)
+         {
+            BlockStatement bbody = (BlockStatement) this.body;
+            returns = bbody.returns;
+         }
+         else if (this.body instanceof ConditionalStatement)
+         {
+            ConditionalStatement cbody = (ConditionalStatement) this.body;
+            returns = cbody.returns;
+         }
+      }
+      
+      if(!returns)
+      {
+         String message = String.format(
+            "Path Return Error: Function %s does not return on all paths",
+            this.name
+         );
+         state.addError(this.lineNum, message);
+      }
    }
 }

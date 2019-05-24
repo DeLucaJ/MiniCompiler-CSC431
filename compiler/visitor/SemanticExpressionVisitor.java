@@ -67,6 +67,14 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
             {
                 return new BoolType();
             }
+            else if
+            (
+                (left instanceof StructType && right instanceof VoidType) ||
+                (left instanceof VoidType && right instanceof StructType)
+            )
+            {
+                return new BoolType();
+            }
             else
             {
                 String message = String.format(

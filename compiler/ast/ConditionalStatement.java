@@ -5,6 +5,7 @@ import visitor.*;
 public class ConditionalStatement
    extends AbstractStatement
 {
+   public boolean returns; 
    private final Expression guard;
    private final Statement thenBlock;
    private final Statement elseBlock;
@@ -16,6 +17,7 @@ public class ConditionalStatement
       this.guard = guard;
       this.thenBlock = thenBlock;
       this.elseBlock = elseBlock;
+      this.returns = false;
    }
 
    //Landing for visitor

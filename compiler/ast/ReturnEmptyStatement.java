@@ -5,6 +5,8 @@ import visitor.*;
 public class ReturnEmptyStatement
    extends AbstractStatement
 {
+   //public boolean valid; 
+
    public ReturnEmptyStatement(int lineNum)
    {
       super(lineNum);

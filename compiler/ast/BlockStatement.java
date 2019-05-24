@@ -7,12 +7,14 @@ import java.util.ArrayList;
 public class BlockStatement
    extends AbstractStatement
 {
+   public boolean returns; 
    private final List<Statement> statements;
 
    public BlockStatement(int lineNum, List<Statement> statements)
    {
       super(lineNum);
       this.statements = statements;
+      this.returns = false;
    }
 
    public static BlockStatement emptyBlock()

@@ -84,7 +84,11 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
         {
             idTarget = (LvalueId) statement.getTarget();
             Type targetType = state.getType(statement.getLineNum(), idTarget.getId());
-            if (!targetType.getClass().equals(sourceType.getClass()))
+            if (targetType instanceof StructType && sourceType instanceof VoidType)
+            {
+                return null;
+            }
+            else if (!targetType.getClass().equals(sourceType.getClass()))
             {
                 String message = String.format(
                     "LvalueId Assignment Type Error: Cannot assign %s to %s of %s",
@@ -102,9 +106,27 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
     public Void visit (BlockStatement statement, State state)
     {
         List<Statement> body = statement.getStatements();
-        body.forEach(
-            (stmt) -> { stmt.accept(this, state); }
-        );
+        boolean returns = false;
+        for (int i = 0; i < body.size(); i++)
+        {
+            Statement stmt = body.get(i);
+            stmt.accept(this, state); 
+            if (stmt instanceof ReturnEmptyStatement || stmt instanceof ReturnStatement)
+            {
+                returns = true; 
+            }
+            else if (stmt instanceof BlockStatement)
+            {
+                BlockStatement bstmt = (BlockStatement) stmt;
+                returns = bstmt.returns;
+            }
+            else if (stmt instanceof ConditionalStatement)
+            {
+                ConditionalStatement cstmt = (ConditionalStatement) stmt;
+                returns = cstmt.returns; 
+            }
+        }
+        statement.returns = returns; 
         return null;
     }
 
@@ -123,6 +145,20 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
         statement.getThen().accept(this, state);
         statement.getElse().accept(this, state);
 
+        boolean thenRet = false;
+        boolean elseRet = false;
+        //check then and else
+        if (statement.getThen() instanceof BlockStatement)
+        {
+            BlockStatement thenBlock = (BlockStatement) statement.getThen();
+            thenRet = thenBlock.returns;
+        }
+        if (statement.getElse() instanceof BlockStatement)
+        {
+            BlockStatement elseBlock = (BlockStatement) statement.getElse();
+            elseRet = elseBlock.returns;
+        }
+        statement.returns = thenRet && elseRet;
         return null;
     }
 
@@ -193,7 +229,11 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
         //evaluate expression
         Type rType = statement.getExpression().accept(expVisitor, state);
         //compare to retType of current Func
-        if (!state.currentFunc.getRetType().getClass().equals(rType.getClass()))
+        if ((rType instanceof VoidType) && (state.currentFunc.getRetType() instanceof StructType))
+        {
+            return null;
+        }
+        else if (!state.currentFunc.getRetType().getClass().equals(rType.getClass()))
         {
             String message = String.format(
                "Return Type Error: Return expression type is of type %s not of %s",
