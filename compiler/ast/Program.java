@@ -45,7 +45,7 @@ public class Program
 
       if (state.errors.size() == 0)
       {
-         System.out.println("Success");
+         System.out.println("Semantics Passed");
       }
    }
 }
