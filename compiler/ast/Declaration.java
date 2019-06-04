@@ -1,6 +1,8 @@
 package ast;
 
 import visitor.*;
+import semantics.*;
+import cfg.*;
 
 public class Declaration
 {

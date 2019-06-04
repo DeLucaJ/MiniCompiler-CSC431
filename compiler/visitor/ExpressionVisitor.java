@@ -4,15 +4,15 @@ import ast.*;
 
 public interface ExpressionVisitor<T>
 {
-    public T visit (BinaryExpression expression, State state);
-    public T visit (DotExpression expression, State state);
-    public T visit (FalseExpression expression, State state);
-    public T visit (IdentifierExpression expression, State state);
-    public T visit (InvocationExpression expression, State state);
-    public T visit (IntegerExpression expression, State state);
-    public T visit (NewExpression expression, State state);
-    public T visit (NullExpression expression, State state);
-    public T visit (ReadExpression expression, State state);
-    public T visit (TrueExpression expression, State state);
-    public T visit (UnaryExpression expression, State state);
+    public T visit (BinaryExpression expression);
+    public T visit (DotExpression expression);
+    public T visit (FalseExpression expressione);
+    public T visit (IdentifierExpression expression);
+    public T visit (InvocationExpression expression);
+    public T visit (IntegerExpression expression);
+    public T visit (NewExpression expression);
+    public T visit (NullExpression expression);
+    public T visit (ReadExpression expression);
+    public T visit (TrueExpression expression);
+    public T visit (UnaryExpression expression);
 }

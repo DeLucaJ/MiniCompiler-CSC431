@@ -2,6 +2,8 @@ package ast;
 
 import java.util.*;
 import visitor.*;
+import semantics.*;
+import cfg.*;
 
 public class TypeDeclaration
 {

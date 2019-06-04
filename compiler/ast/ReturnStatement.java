@@ -16,14 +16,9 @@ public class ReturnStatement
    }
 
    //Landing for visitor
-   public <T> T accept(StatementVisitor<T> visitor, State state)
+   public <T> T accept(StatementVisitor<T> visitor)
    {
-      return visitor.visit(this, state);
-   }
-
-   public void constructCFG(CFStatementVisitor visitor, CFGraph cfg)
-   {
-      visitor.visit(this, cfg);
+      return visitor.visit(this);
    }
 
    public Expression getExpression()

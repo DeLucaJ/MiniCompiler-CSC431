@@ -1,8 +1,9 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
-import visitor.SemanticExpressionVisitor;
-import visitor.SemanticStatementVisitor;
+import visitor.*;
+import semantics.*;
+import cfg.*;
 
 import java.io.*;
 import javax.json.JsonValue;

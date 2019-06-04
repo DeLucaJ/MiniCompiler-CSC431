@@ -1,29 +1,32 @@
-package visitor;
+package semantics;
 
 import ast.*;
+import visitor.*;
 import java.lang.*;
 import java.util.*;
 
 public class SemanticStatementVisitor implements StatementVisitor<Void>
 {
+    public State state;
     private SemanticExpressionVisitor expVisitor;
 
-    public SemanticStatementVisitor()
+    public SemanticStatementVisitor(State state)
     {
-        this.expVisitor = new SemanticExpressionVisitor();
+        this.state = state;
+        this.expVisitor = new SemanticExpressionVisitor(this.state);
     }
 
-    public Void visit (AssignmentStatement statement, State state)
+    public Void visit (AssignmentStatement statement)
     {
         LvalueDot dotTarget;
         LvalueId idTarget;
-        Type sourceType = statement.getSource().accept(expVisitor, state);
+        Type sourceType = statement.getSource().accept(expVisitor);
 
         //evalueate Lvalue of target
         if (statement.getTarget() instanceof LvalueDot)
         {
             dotTarget = (LvalueDot) statement.getTarget();
-            Type leftType = dotTarget.getLeft().accept(this.expVisitor, state);
+            Type leftType = dotTarget.getLeft().accept(this.expVisitor);
             if (!(leftType instanceof StructType))
             {
                 String message = String.format(
@@ -103,14 +106,14 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
         return null;
     }
     
-    public Void visit (BlockStatement statement, State state)
+    public Void visit (BlockStatement statement)
     {
         List<Statement> body = statement.getStatements();
         boolean returns = false;
         for (int i = 0; i < body.size(); i++)
         {
             Statement stmt = body.get(i);
-            stmt.accept(this, state); 
+            stmt.accept(this); 
             if (stmt instanceof ReturnEmptyStatement || stmt instanceof ReturnStatement)
             {
                 returns = true; 
@@ -130,10 +133,10 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
         return null;
     }
 
-    public Void visit (ConditionalStatement statement, State state)
+    public Void visit (ConditionalStatement statement)
     {
         //Evaluate guard
-        Type guardType = statement.getGuard().accept(expVisitor, state);
+        Type guardType = statement.getGuard().accept(expVisitor);
         if (!(guardType instanceof BoolType))
         {
             String message = String.format(
@@ -142,8 +145,8 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
             );
             state.addError(statement.getLineNum(), message);
         }
-        statement.getThen().accept(this, state);
-        statement.getElse().accept(this, state);
+        statement.getThen().accept(this);
+        statement.getElse().accept(this);
 
         boolean thenRet = false;
         boolean elseRet = false;
@@ -162,9 +165,9 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
         return null;
     }
 
-    public Void visit (DeleteStatement statement, State state)
+    public Void visit (DeleteStatement statement)
     {
-        Type exptype = statement.getExpression().accept(expVisitor, state);
+        Type exptype = statement.getExpression().accept(expVisitor);
         if (!(exptype instanceof StructType))
         {
             String message = String.format(
@@ -176,15 +179,15 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
         return null;
     }  
     
-    public Void visit (InvocationStatement statement, State state)
+    public Void visit (InvocationStatement statement)
     {
-        statement.getExpression().accept(expVisitor, state);
+        statement.getExpression().accept(expVisitor);
         return null;
     }
     
-    public Void visit (PrintStatement statement, State state)
+    public Void visit (PrintStatement statement)
     {
-        Type expType = statement.getExpression().accept(expVisitor, state);
+        Type expType = statement.getExpression().accept(expVisitor);
         if (!(expType instanceof IntType))
         {
             String message = String.format(
@@ -196,9 +199,9 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
         return null;
     }
     
-    public Void visit (PrintLnStatement statement, State state)
+    public Void visit (PrintLnStatement statement)
     {
-        Type expType = statement.getExpression().accept(expVisitor, state);
+        Type expType = statement.getExpression().accept(expVisitor);
         if (!(expType instanceof IntType))
         {
             String message = String.format(
@@ -210,7 +213,7 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
         return null;
     }
     
-    public Void visit (ReturnEmptyStatement statement, State state)
+    public Void visit (ReturnEmptyStatement statement)
     {
         // make sure current func returns void/null
         if (!state.currentFunc.getRetType().getClass().equals((new VoidType()).getClass()))
@@ -224,10 +227,10 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
         return null;
     }
     
-    public Void visit (ReturnStatement statement, State state)
+    public Void visit (ReturnStatement statement)
     {
         //evaluate expression
-        Type rType = statement.getExpression().accept(expVisitor, state);
+        Type rType = statement.getExpression().accept(expVisitor);
         //compare to retType of current Func
         if ((rType instanceof VoidType) && (state.currentFunc.getRetType() instanceof StructType))
         {
@@ -245,10 +248,10 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
         return null;
     }
     
-    public Void visit (WhileStatement statement, State state)
+    public Void visit (WhileStatement statement)
     {
         //evaluate guard
-        Type guardType = statement.getGuard().accept(expVisitor, state);
+        Type guardType = statement.getGuard().accept(expVisitor);
         if (!(guardType instanceof BoolType))
         {
             String message = String.format(
@@ -258,7 +261,7 @@ public class SemanticStatementVisitor implements StatementVisitor<Void>
             state.addError(statement.getLineNum(), message);
         }
         //evaluate body
-        statement.getBody().accept(this, state);
+        statement.getBody().accept(this);
         return null;
     }
 }

@@ -14,9 +14,9 @@ public class NewExpression
    }
 
    // Landing for visitor
-   public <T> T accept (ExpressionVisitor<T> visitor, State state)
+   public <T> T accept (ExpressionVisitor<T> visitor)
    {
-      return visitor.visit(this, state);
+      return visitor.visit(this);
    }
 
    public String getId(){ return this.id; }

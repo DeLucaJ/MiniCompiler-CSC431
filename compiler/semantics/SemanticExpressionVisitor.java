@@ -1,18 +1,20 @@
-package visitor;
+package semantics;
 
 import ast.*;
-
+import visitor.*;
 import java.io.*;
 import java.util.*;
 
 public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
 {
-    public SemanticExpressionVisitor(){}
+    public State state;
 
-    public Type visit (BinaryExpression expression, State state)
+    public SemanticExpressionVisitor(State state){ this.state = state; }
+
+    public Type visit (BinaryExpression expression)
     {
-        Type left = expression.getLeft().accept(this, state);
-        Type right = expression.getRight().accept(this, state);
+        Type left = expression.getLeft().accept(this);
+        Type right = expression.getRight().accept(this);
         BinaryExpression.Operator op = expression.getOperator();
 
         if (
@@ -105,10 +107,10 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
     }
 
     // Likely needs to check for a value in table
-    public Type visit (DotExpression expression, State state)
+    public Type visit (DotExpression expression)
     {
         String id = expression.getId();
-        Type left = expression.getLeft().accept(this, state);
+        Type left = expression.getLeft().accept(this);
 
         //left needs to be a struct type
         if (left instanceof StructType) 
@@ -149,23 +151,23 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
         }
     }
 
-    public Type visit (FalseExpression expression, State state)
+    public Type visit (FalseExpression expression)
     {
         return new BoolType();
     }
 
-    public Type visit (IdentifierExpression expression, State state)
+    public Type visit (IdentifierExpression expression)
     {
         String id = expression.getId();
         return state.getType(expression.getLineNum(), id);
     }
     
-    public Type visit (InvocationExpression expression, State state)
+    public Type visit (InvocationExpression expression)
     {
         String name = expression.getName();
         List<Type> arguments = new ArrayList<Type>();
         expression.getArguments().forEach(
-            (exp) -> { arguments.add(exp.accept(this, state)); }
+            (exp) -> { arguments.add(exp.accept(this)); }
         );
         FunctionType func = state.funcs.get(name);
         List<Type> params = func.getParamTypes();
@@ -202,12 +204,12 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
         return func.getRetType();
     }
     
-    public Type visit (IntegerExpression expression, State state)
+    public Type visit (IntegerExpression expression)
     {   
         return new IntType();
     }
 
-    public Type visit (NewExpression expression, State state)
+    public Type visit (NewExpression expression)
     {
         //throw error if structure does not exist in state
         if (state.structs.containsKey(expression.getId()))
@@ -224,25 +226,25 @@ public class SemanticExpressionVisitor implements ExpressionVisitor<Type>
         }
     }
     
-    public Type visit (NullExpression expression, State state)
+    public Type visit (NullExpression expression)
     {
         return new VoidType();
     }
     
-    public Type visit (ReadExpression expression, State state)
+    public Type visit (ReadExpression expression)
     {
         return new IntType(); //Read expresion reads a number
     }
     
-    public Type visit (TrueExpression expression, State state)
+    public Type visit (TrueExpression expression)
     {
         return new BoolType();
     }
     
-    public Type visit (UnaryExpression expression, State state)
+    public Type visit (UnaryExpression expression)
     {
         UnaryExpression.Operator operator = expression.getOperator();
-        Type operand = expression.getOperand().accept(this, state);
+        Type operand = expression.getOperand().accept(this);
 
         if (operator == UnaryExpression.Operator.NOT)
         {

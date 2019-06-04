@@ -2,6 +2,8 @@ package ast;
 
 import java.util.*;
 import visitor.*;
+import semantics.*;
+import cfg.*;
 
 public class Function
 {
@@ -51,14 +53,14 @@ public class Function
 
    public void analyze(State state)
    {
-      SemanticStatementVisitor visitor = new SemanticStatementVisitor();
+      SemanticStatementVisitor visitor = new SemanticStatementVisitor(state);
       state.currentFunc = this.funcType();
       state.pushTable();
       //add params to state
       for (Declaration param : this.params){ param.defineSymbol(state); }
       //add locals to state
       for (Declaration local : this.locals){ local.defineSymbol(state); }
-      body.accept(visitor, state);
+      body.accept(visitor);
       state.popTable();
       boolean returns = true;
       if(!(this.retType instanceof VoidType))

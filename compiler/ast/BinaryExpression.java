@@ -25,9 +25,9 @@ public class BinaryExpression
    public Operator getOperator() { return this.operator; }
 
    // Landing for visitor
-   public <T> T accept (ExpressionVisitor<T> visitor, State state)
+   public <T> T accept (ExpressionVisitor<T> visitor)
    {
-      return visitor.visit(this, state);
+      return visitor.visit(this);
    }
 
    public static BinaryExpression create(int lineNum, String opStr,

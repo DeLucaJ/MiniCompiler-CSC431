@@ -4,60 +4,65 @@ import ast.*;
 import visitor.*;
 import java.util.*;
 
-public class CFExpressionVisitor
+public class CFExpressionVisitor implements ExpressionVisitor<Void>
 {
-    public void visit (BinaryExpression expression, CFGraph cfg)
-    {
+    public CFGraph cfg;
 
+    public CFExpressionVisitor(CFGraph cfg){ this.cfg = cfg; }
+
+
+    public Void visit (BinaryExpression expression)
+    {
+        return null;
     }
 
-    public void visit (DotExpression expression, CFGraph cfg)
+    public Void visit (DotExpression expression)
     {
-
+        return null;
     }
 
-    public void visit (FalseExpression expression, CFGraph cfg)
+    public Void visit (FalseExpression expression)
     {
-
+        return null;
     }
 
-    public void visit (IdentifierExpression expression, CFGraph cfg)
+    public Void visit (IdentifierExpression expression)
     {
-
+        return null;
     }
 
-    public void visit (InvocationExpression expression, CFGraph cfg)
+    public Void visit (InvocationExpression expression)
     {
-
+        return null;
     }
 
-    public void visit (IntegerExpression expression, CFGraph cfg)
+    public Void visit (IntegerExpression expression)
     {
-
+        return null;
     }
 
-    public void visit (NewExpression expression, CFGraph cfg)
+    public Void visit (NewExpression expression)
     {
-
+        return null;
     }
 
-    public void visit (NullExpression expression, CFGraph cfg)
+    public Void visit (NullExpression expression)
     {
-
+        return null;
     }
 
-    public void visit (ReadExpression expression, CFGraph cfg)
+    public Void visit (ReadExpression expression)
     {
-
+        return null;
     }
 
-    public void visit (TrueExpression expression, CFGraph cfg)
+    public Void visit (TrueExpression expression)
     {
-
+        return null;
     }
 
-    public void visit (UnaryExpression expression, CFGraph cfg)
+    public Void visit (UnaryExpression expression)
     {
-
+        return null;
     }
 }

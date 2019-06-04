@@ -4,57 +4,66 @@ import ast.*;
 import visitor.*;
 import java.util.*;
 
-public class CFStatementVisitor
+public class CFStatementVisitor implements StatementVisitor<Void>
 {
-    public void visit (AssignmentStatement statement, CFGraph cfg)
+    public CFGraph cfg;
+
+    public CFStatementVisitor(CFGraph cfg){ this.cfg = cfg; }
+
+    public Void visit (AssignmentStatement statement)
     {
-        
+        return null;
     }
 
-    public void visit (BlockStatement statement, CFGraph cfg)
+    public Void visit (BlockStatement statement)
     {
         //Graph Construction
+        return null;
     }
     
-    public void visit (ConditionalStatement statement, CFGraph cfg)
+    public Void visit (ConditionalStatement statement)
     {
         //Graph Construction
+        return null;
     }
     
-    public void visit (DeleteStatement statement, CFGraph cfg)
+    public Void visit (DeleteStatement statement)
     {
-
+        return null;
     }
     
-    public void visit (InvocationStatement statement, CFGraph cfg)
+    public Void visit (InvocationStatement statement)
     {
-
+        return null;
     }
     
-    public void visit (PrintStatement statement, CFGraph cfg)
+    public Void visit (PrintStatement statement)
     {
-
+        return null;
     }
     
-    public void visit (PrintLnStatement statement, CFGraph cfg)
+    public Void visit (PrintLnStatement statement)
     {
-
+        return null;
     }
     
-    public void visit (ReturnEmptyStatement statement, CFGraph cfg)
+    public Void visit (ReturnEmptyStatement statement)
     {
         //Graph Construction
         //Goto ExitNode
+        return null;
     }
     
-    public void visit (ReturnStatement statement, CFGraph cfg)
+    public Void visit (ReturnStatement statement)
     {
         //Graph Construction
         //Goto ExitNode
+        return null;
     }
     
-    public void visit (WhileStatement statement, CFGraph cfg)
+    public Void visit (WhileStatement statement)
     {
         //Graph Construction
+        return null;
     }
 }

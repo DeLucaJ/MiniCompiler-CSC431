@@ -11,8 +11,8 @@ public class FalseExpression
    }
 
    //Landing for Visitor
-   public <T> T accept (ExpressionVisitor<T> visitor, State state)
+   public <T> T accept (ExpressionVisitor<T> visitor)
    {
-      return visitor.visit(this, state);
+      return visitor.visit(this);
    }
 }

@@ -1,7 +1,6 @@
-package visitor;
+package semantics;
 
 import ast.*;
-
 import java.util.*;
 
 public class State
