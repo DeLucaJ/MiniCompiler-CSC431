@@ -6,17 +6,28 @@ import java.util.*;
 
 public class CFGraph
 {
-    //private String label;
+    private String label;
     private CFBlock entry;
     private CFBlock current;
     private CFBlock exit;
 
     public CFGraph()
     {
+        this.label = null;
         this.entry = new CFBlock();
         this.exit = new CFBlock();
         this.entry.addNext(this.exit);
         this.current = this.entry;
+    }
+
+    public String getLabel()
+    {
+        return this.label;
+    }
+
+    public void setLabel(String newlabel)
+    {
+        this.label = newlabel;
     }
 
     public CFBlock getEntry()

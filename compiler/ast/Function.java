@@ -86,4 +86,14 @@ public class Function
          state.addError(this.lineNum, message);
       }
    }
+
+   public void controlFlow(CFGraph cfg)
+   {
+      CFStatementVisitor visitor = new CFStatementVisitor(cfg);
+      cfg.setLabel(this.name);
+
+      //might need to do some stuff regarding declarations, but no need right now
+
+      this.body.accept(visitor);
+   }
 }

@@ -7,8 +7,13 @@ import java.util.*;
 public class CFStatementVisitor implements StatementVisitor<Void>
 {
     public CFGraph cfg;
+    private CFExpressionVisitor expVisitor;
 
-    public CFStatementVisitor(CFGraph cfg){ this.cfg = cfg; }
+    public CFStatementVisitor(CFGraph cfg)
+    { 
+        this.cfg = cfg;
+        this.expVisitor = new CFExpressionVisitor(cfg); 
+    }
 
     public Void visit (AssignmentStatement statement)
     {

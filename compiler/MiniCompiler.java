@@ -6,6 +6,7 @@ import semantics.*;
 import cfg.*;
 
 import java.io.*;
+import java.util.*;
 import javax.json.JsonValue;
 
 public class MiniCompiler
@@ -41,6 +42,10 @@ public class MiniCompiler
 
          // Milestone 1 - Semantic Analysis
          program.analyze();
+
+         // Milestone 2 & 3 - Control Flow
+         List<CFGraph> cfgs = new ArrayList<CFGraph>();
+         prigram.controlfFlow(cfgs);
       }
    }
 

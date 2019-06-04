@@ -36,18 +36,19 @@ public class Program
       //analyze all funcs
       for (Function func : this.funcs){ func.analyze(state); }
 
-      //print relevant state stuff
-      /*System.out.printf(
-         "Symbols| %s\nStructs| %s\nFuncs  | %s\nContains B = %b", 
-         state.symbols.toString(),
-         state.structs.toString(),
-         state.funcs.toString(),
-         state.structs.containsKey("B")
-      );*/
-
       if (state.errors.size() == 0)
       {
          System.out.println("Semantics Passed");
+      }
+   }
+
+   public void controlFlow(List<CFGraph> cfgs)
+   {
+      for (int i = 0; i < this.funcs.size(); i++)
+      { 
+         CFGraph cfg = new CFGraph();
+         cfgs.add(cfg);
+         this.funcs.get(i).controlFlow(cfg);
       }
    }
 }
