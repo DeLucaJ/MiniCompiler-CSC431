@@ -1,6 +1,7 @@
 package ast;
 
 import visitor.*;
+import cfg.*; 
 
 public class ConditionalStatement
    extends AbstractStatement
@@ -24,6 +25,11 @@ public class ConditionalStatement
    public <T> T accept(StatementVisitor<T> visitor, State state)
    {
       return visitor.visit(this, state);
+   }
+
+   public void constructCFG(CFStatementVisitor visitor, CFGraph cfg)
+   {
+      visitor.visit(this, cfg);
    }
 
    public Expression getGuard()

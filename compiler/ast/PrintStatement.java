@@ -1,6 +1,7 @@
 package ast;
 
 import visitor.*;
+import cfg.*;
 
 public class PrintStatement
    extends AbstractStatement
@@ -17,6 +18,11 @@ public class PrintStatement
    public <T> T accept(StatementVisitor<T> visitor, State state)
    {
       return visitor.visit(this, state);
+   }
+
+   public void constructCFG(CFStatementVisitor visitor, CFGraph cfg)
+   {
+      visitor.visit(this, cfg);
    }
 
    public Expression getExpression()

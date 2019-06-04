@@ -1,5 +1,6 @@
 package ast;
 
+import cfg.*;
 import visitor.*;
 
 public class AssignmentStatement
@@ -19,6 +20,11 @@ public class AssignmentStatement
    public <T> T accept(StatementVisitor<T> visitor, State state)
    {
       return visitor.visit(this, state);
+   }
+
+   public void constructCFG(CFStatementVisitor visitor, CFGraph cfg)
+   {
+      visitor.visit(this, cfg);
    }
 
    public Lvalue getTarget()

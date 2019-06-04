@@ -1,6 +1,7 @@
 package ast;
 
 import visitor.*;
+import cfg.*;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -26,6 +27,11 @@ public class BlockStatement
    public <T> T accept(StatementVisitor<T> visitor, State state)
    {
       return visitor.visit(this, state);
+   }
+
+   public void constructCFG(CFStatementVisitor visitor, CFGraph cfg)
+   {
+      visitor.visit(this, cfg);
    }
 
    public List<Statement> getStatements()

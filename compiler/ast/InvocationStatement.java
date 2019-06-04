@@ -1,7 +1,7 @@
 package ast;
 
 import visitor.*;
-import java.util.List;
+import cfg.*;
 
 public class InvocationStatement
    extends AbstractStatement
@@ -18,6 +18,11 @@ public class InvocationStatement
    public <T> T accept(StatementVisitor<T> visitor, State state)
    {
       return visitor.visit(this, state);
+   }
+
+   public void constructCFG(CFStatementVisitor visitor, CFGraph cfg)
+   {
+      visitor.visit(this, cfg);
    }
 
    public Expression getExpression()
