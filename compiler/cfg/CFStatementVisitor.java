@@ -33,10 +33,10 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
         //Graph Construction
         
         //old way, create a block everytime this was entered, should have just chained
-        /*//get the predecessor
+        //get the predecessor
         //this should always be the predecessor (i hope)
         //every statement should add a block to the list and then return it
-        CFBlock pred = cfg.getBlocks().getLast();
+        /*CFBlock pred = cfg.getBlocks().getLast();
 
         //create the block for this entry
         CFBlock block = new CFBlock(blockLabel());
