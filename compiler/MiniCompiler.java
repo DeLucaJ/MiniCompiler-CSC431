@@ -41,11 +41,12 @@ public class MiniCompiler
          ast.Program program = programVisitor.visit(tree);
 
          // Milestone 1 - Semantic Analysis
-         program.analyze();
-
+         boolean passed = program.analyze();
+         if (!passed) return;
+         
          // Milestone 2 & 3 - Control Flow
          List<CFGraph> cfgs = new ArrayList<CFGraph>();
-         prigram.controlfFlow(cfgs);
+         program.cfTransform(cfgs);
       }
    }
 

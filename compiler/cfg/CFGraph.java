@@ -1,23 +1,22 @@
-package cfg;
+package cfg; 
 
-import ast.*;
-import visitor.*;
 import java.util.*;
+import java.io.*;
 
 public class CFGraph
 {
     private String label;
     private CFBlock entry;
-    private CFBlock current;
     private CFBlock exit;
+    private LinkedList<CFBlock> blocks;
 
-    public CFGraph()
+    public CFGraph(String label)
     {
-        this.label = null;
-        this.entry = new CFBlock();
-        this.exit = new CFBlock();
-        this.entry.addNext(this.exit);
-        this.current = this.entry;
+        this.label = label;
+        this.blocks = new LinkedList<CFBlock>();
+        this.entry = new CFBlock(label + "Entry");
+        this.exit = new CFBlock(label + "Exit");
+        this.blocks.add(this.entry);
     }
 
     public String getLabel()
@@ -30,6 +29,11 @@ public class CFGraph
         this.label = newlabel;
     }
 
+    public LinkedList<CFBlock> getBlocks()
+    {
+        return this.blocks;
+    }
+
     public CFBlock getEntry()
     {
         return this.entry;
@@ -40,23 +44,16 @@ public class CFGraph
         return this.exit;
     }
 
-    public CFBlock getCurrent()
+    public void printGraph()
     {
-        return this.current;
-    }
+        //print cfg name
+        System.out.println(this.label + ":");
 
-    public void setCurrent(CFBlock block)
-    {
-        this.current = block;
-    }
-
-    public void insertGraph(CFGraph graph)
-    {
-        //place graph between current node and exit
-        //attach new graph at current node
-        this.current.removeNext(this.exit);
-        this.current.addNext(graph.getEntry());
-        //attack new graph at exit
-        graph.getExit().addNext(this.exit);
+        //print the blocks
+        for (CFBlock block : blocks)
+        {
+            System.out.print("\t");
+            block.printBlock();
+        }
     }
 }

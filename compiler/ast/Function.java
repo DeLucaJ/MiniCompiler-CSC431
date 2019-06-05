@@ -25,6 +25,11 @@ public class Function
       this.body = body;
    }
 
+   public String getName()
+   {
+      return this.name;
+   }
+
    public void define(State state)
    {
       if (state.containsFunction(this.name))
@@ -87,13 +92,32 @@ public class Function
       }
    }
 
-   public void controlFlow(CFGraph cfg)
+   public void cfTransform(CFGraph cfg)
    {
       CFStatementVisitor visitor = new CFStatementVisitor(cfg);
-      cfg.setLabel(this.name);
+      // declarations should be included at the beginning of the body block 
+      // this may only be necessary for the stack command so hold off until translation
+      
+      // create block for body
+      CFBlock block = new CFBlock(visitor.blockLabel());
+      
+      // create an edge entry -> block
+      cfg.getEntry().addEdge(block);
+      
+      // add block to the linked list
+      cfg.getBlocks().add(block);
+      
+      // run the control flow visitor on the body and get the last block that it creates
+      CFBlock last = this.body.accept(visitor);
+      
+      // this is wrong because last should already have been added to the list
+      //cfg.getBlocks().add(last);
+      
+      //return statement visit already does this
+      //connect edge to the exit of the list
+      //last.addEdge(cfg.getExit());
 
-      //might need to do some stuff regarding declarations, but no need right now
-
-      this.body.accept(visitor);
+      //add exit to the end of the linked list
+      cfg.getBlocks().add(cfg.getExit());
    }
 }

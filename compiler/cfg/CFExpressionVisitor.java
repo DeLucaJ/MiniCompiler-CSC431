@@ -6,7 +6,7 @@ import java.util.*;
 
 public class CFExpressionVisitor implements ExpressionVisitor<Void>
 {
-    public CFGraph cfg;
+    private CFGraph cfg;
 
     public CFExpressionVisitor(CFGraph cfg){ this.cfg = cfg; }
 

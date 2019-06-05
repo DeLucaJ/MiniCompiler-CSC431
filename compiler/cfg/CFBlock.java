@@ -1,32 +1,52 @@
 package cfg;
 
-import ast.*;
-import visitor.*;
 import java.util.*;
 
 public class CFBlock
 {
-    private List<Instruction> instructions;
-    private List<CFBlock> next;
+    private String label;
+    private LinkedList<Instruction> instructions;
+    private LinkedList<CFEdge> edges;   
 
-    public CFBlock()
+    public CFBlock(String label)
     {
-        this.instructions = new ArrayList<Instruction>();
-        this.next = new ArrayList<CFBlock>();
+        this.label = label;
+        this.instructions = new LinkedList<Instruction>();
+        this.edges = new LinkedList<CFEdge>();
     }
 
-    public void addNext(CFBlock next)
+    public String getLabel()
     {
-        this.next.add(next);
+        return this.label;
     }
 
-    public void removeNext(CFBlock block)
+    public List<CFEdge> getEdges()
     {
-        this.next.remove(block);
+        return this.edges;
     }
 
-    public void clearNext()
+    public List<Instruction> getInstructions()
     {
-        this.next.clear();
+        return this.instructions;
+    }
+
+    public void addEdge(CFBlock sink)
+    {
+        CFEdge newedge = new CFEdge(this, sink);
+        this.edges.add(newedge);
+    }
+
+    public void printBlock()
+    {
+        //print label
+        System.out.println( label + " (" + instructions.size() + " instructions):");
+
+        //print edges
+        for (CFEdge edge : edges)
+        {
+            System.out.print("\t\t");
+            edge.printEdge();
+            System.out.println("");
+        }
     }
 }

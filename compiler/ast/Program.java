@@ -1,7 +1,6 @@
 package ast;
 
 import java.util.List;
-import visitor.*;
 import semantics.*;
 import cfg.*;
 
@@ -19,7 +18,7 @@ public class Program
       this.funcs = funcs;
    }
 
-   public void analyze()
+   public boolean analyze()
    {
       //initialize state
       State state = new State();
@@ -39,16 +38,27 @@ public class Program
       if (state.errors.size() == 0)
       {
          System.out.println("Semantics Passed");
+         return true;
+      }
+      else
+      {
+         return false;
       }
    }
 
-   public void controlFlow(List<CFGraph> cfgs)
+   public void cfTransform(List<CFGraph> cfgs)
    {
       for (int i = 0; i < this.funcs.size(); i++)
       { 
-         CFGraph cfg = new CFGraph();
+         CFGraph cfg = new CFGraph(this.funcs.get(i).getName());
          cfgs.add(cfg);
-         this.funcs.get(i).controlFlow(cfg);
+         this.funcs.get(i).cfTransform(cfg);
+      }
+
+      // display graphs
+      for (CFGraph cfg : cfgs)
+      {
+         cfg.printGraph();
       }
    }
 }
