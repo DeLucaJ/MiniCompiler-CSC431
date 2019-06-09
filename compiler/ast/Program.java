@@ -50,7 +50,7 @@ public class Program
    {
       for (int i = 0; i < this.funcs.size(); i++)
       { 
-         CFGraph cfg = new CFGraph(this.funcs.get(i).getName());
+         CFGraph cfg = new CFGraph(this.funcs.get(i), this.funcs.get(i).getName());
          cfgs.add(cfg);
          this.funcs.get(i).cfTransform(cfg);
       }

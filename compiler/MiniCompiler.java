@@ -28,9 +28,9 @@ public class MiniCompiler
             and the next phase of the compiler can read the JSON to build
             a language-specific AST representation.
          */
-         /*MiniToJsonVisitor jsonVisitor = new MiniToJsonVisitor();
+         MiniToJsonVisitor jsonVisitor = new MiniToJsonVisitor();
          JsonValue json = jsonVisitor.visit(tree);
-         System.out.println(json);*/
+         System.out.println(json);
 
          /*
             This visitor will build an object representation of the AST
@@ -45,7 +45,7 @@ public class MiniCompiler
          if (!passed) return;
          
          // Milestone 2 & 3 - Control Flow
-         List<CFGraph> cfgs = new ArrayList<CFGraph>();
+         List<CFGraph> cfgs = new LinkedList<CFGraph>();
          program.cfTransform(cfgs);
       }
    }

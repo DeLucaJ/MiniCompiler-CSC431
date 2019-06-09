@@ -1,17 +1,19 @@
 package cfg;
 
+import llvm.*;
 import java.util.*;
 
 public class CFBlock
 {
     private String label;
-    private LinkedList<Instruction> instructions;
+    private LLVMBlock llvmblock;
+    //private LinkedList<Instruction> instructions;
     private LinkedList<CFEdge> edges;   
 
     public CFBlock(String label)
     {
         this.label = label;
-        this.instructions = new LinkedList<Instruction>();
+        //this.instructions = new LinkedList<Instruction>();
         this.edges = new LinkedList<CFEdge>();
     }
 
@@ -25,10 +27,10 @@ public class CFBlock
         return this.edges;
     }
 
-    public List<Instruction> getInstructions()
+    /*public List<Instruction> getInstructions()
     {
         return this.instructions;
-    }
+    }*/
 
     public void addEdge(CFBlock sink)
     {
@@ -39,7 +41,7 @@ public class CFBlock
     public void printBlock()
     {
         //print label
-        System.out.println( label + " (" + instructions.size() + " instructions):");
+        System.out.println( label + ":");
 
         //print edges
         for (CFEdge edge : edges)
