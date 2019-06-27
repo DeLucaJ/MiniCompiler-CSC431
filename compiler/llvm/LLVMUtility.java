@@ -13,12 +13,17 @@ public class LLVMUtility
 
     public static LLVMTypeDeclaration typeToLLVM(TypeDeclaration type)
     {
-        ArrayList<LLVMType> props = new ArrayList<LLVMType>();
+        ArrayList<LLVMIdentifier> props = new ArrayList<LLVMIdentifier>();
         for (Declaration field : type.getFields())
         {
-            props.add(astToLLVM(field.getType()));
+            props.add(declToIdentifier(field));
         }
         return new LLVMTypeDeclaration(type.getName(), props);
+    }
+
+    public static LLVMIdentifier declToIdentifier(Declaration decl)
+    {
+        return new LLVMIdentifier(astToLLVM(decl.getType()), decl.getName(), false);
     }
 
     public static LLVMType astToLLVM(Type type)

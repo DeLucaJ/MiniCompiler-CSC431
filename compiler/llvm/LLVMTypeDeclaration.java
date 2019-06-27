@@ -5,9 +5,9 @@ import java.util.ArrayList;
 public class LLVMTypeDeclaration implements LLVMElement
 {
     private final String name;
-    private final ArrayList<LLVMType> props;
+    private final ArrayList<LLVMIdentifier> props;
 
-    public LLVMTypeDeclaration(String name, ArrayList<LLVMType> props)
+    public LLVMTypeDeclaration(String name, ArrayList<LLVMIdentifier> props)
     {
         this.name = name;
         this.props = props;
@@ -18,7 +18,7 @@ public class LLVMTypeDeclaration implements LLVMElement
         return this.name;
     }
 
-    public ArrayList<LLVMType> getProps()
+    public ArrayList<LLVMIdentifier> getProps()
     {
         return this.props;
     }

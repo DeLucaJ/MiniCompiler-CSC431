@@ -66,36 +66,48 @@ public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
 
     public LLVMValue visit (DotExpression expression)
     {
+        //There is some nonsense happening right now
+        LLVMValue leftVal = expression.getLeft().accept(this);
+
+        if (leftVal.getType() instanceof LLVMStructure)
+        {
+
+        }
+
         return null;
     }
 
     public LLVMValue visit (FalseExpression expression)
     {
-        return null;
+        return new LLVMImmediate(new LLVMInteger32(), "0");
     }
 
     public LLVMValue visit (IdentifierExpression expression)
     {
+        // checking for global might be rough
         return null;
     }
 
     public LLVMValue visit (InvocationExpression expression)
     {
+        //figure out call stuff
         return null;
     }
 
     public LLVMValue visit (IntegerExpression expression)
     {
-        return null;
+        return new LLVMImmediate(new LLVMInteger32(), expression.getValue());
     }
 
     public LLVMValue visit (NewExpression expression)
     {
+        //struct things
         return null;
     }
 
     public LLVMValue visit (NullExpression expression)
     {
+        //how does making things null work
         return null;
     }
 
@@ -106,11 +118,29 @@ public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
 
     public LLVMValue visit (TrueExpression expression)
     {
-        return null;
+        return new LLVMImmediate(new LLVMInteger32(), "4294967295");
     }
 
     public LLVMValue visit (UnaryExpression expression)
     {
-        return null;
+        LLVMValue operand = expression.getOperand().accept(this);
+        LLVMValue target = new LLVMRegister(operand.getType(), "" + this.registerIndex++);
+
+        LLVMInstruction inst = null;
+
+        switch (expression.getOperator())
+        {
+            case NOT:
+                //likely has an issue with booleans
+                inst = new LLVMXorInstruction(target, operand, new LLVMImmediate(new LLVMInteger32(), "4294967295"));
+                break;
+            case MINUS:
+                //might have some issues with signed and unsigned
+                inst = new LLVMSubInstruction(target, new LLVMImmediate(new LLVMInteger32(), "0"), operand);
+                break;
+        }
+
+        this.cfg.getBlocks().getLast().getInstructions().add(inst);
+        return target;
     }
 }
