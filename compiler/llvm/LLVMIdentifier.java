@@ -18,6 +18,6 @@ public class LLVMIdentifier extends LLVMNamedValue
     public String llvm()
     {
         String tag = this.global ? "@" : "%";
-        return String.format("%s %s%s", this.getType().llvm(), tag, this.getName());
+        return String.format("%s%s", tag, this.getName());
     }
 }

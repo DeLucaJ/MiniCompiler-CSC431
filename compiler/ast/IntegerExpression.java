@@ -18,4 +18,9 @@ public class IntegerExpression
    {
       return visitor.visit(this);
    }
+
+   public String getValue()
+   {
+      return this.value;
+   }
 }

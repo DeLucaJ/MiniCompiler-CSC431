@@ -1,7 +1,6 @@
 package ast;
 
 import visitor.*;
-import cfg.*;
 
 public class PrintStatement
    extends AbstractStatement

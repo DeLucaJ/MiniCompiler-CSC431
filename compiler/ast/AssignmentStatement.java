@@ -1,6 +1,5 @@
 package ast;
 
-import cfg.*;
 import visitor.*;
 
 public class AssignmentStatement

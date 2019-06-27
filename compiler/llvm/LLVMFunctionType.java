@@ -5,9 +5,9 @@ import java.util.LinkedList;
 public class LLVMFunctionType implements LLVMType
 {
     private LLVMType rettype;
-    private LinkedList<LLVMType> params;
+    private LinkedList<LLVMDeclaration> params;
 
-    public LLVMFunctionType(LLVMType rettype, LinkedList<LLVMType> params)
+    public LLVMFunctionType(LLVMType rettype, LinkedList<LLVMDeclaration> params)
     {
         this.rettype = rettype;
         this.params = params;
@@ -18,7 +18,7 @@ public class LLVMFunctionType implements LLVMType
         return this.rettype;
     }
 
-    public LinkedList<LLVMType> getParams()
+    public LinkedList<LLVMDeclaration> getParams()
     {
         return this.params;
     }
@@ -32,9 +32,10 @@ public class LLVMFunctionType implements LLVMType
         }
         else if(params.size() > 1)
         {
-            for (LLVMType param : params)
+            for (LLVMDeclaration param : params)
             {
-                decl += param.llvm() + ", ";
+                //probable error
+                decl += param.getType().llvm() + ", ";
             }
         }
         decl += ")";

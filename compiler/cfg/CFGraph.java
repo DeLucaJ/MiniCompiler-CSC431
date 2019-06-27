@@ -1,28 +1,27 @@
 package cfg; 
 
 import java.util.*;
-import java.io.*;
 import llvm.*;
 import ast.*;
 
-public class CFGraph
+public class CFGraph implements LLVMElement
 {
     private String label;
     private CFBlock entry;
     private CFBlock exit;
     private LinkedList<CFBlock> blocks;
-    private LLVMFunction llvmfunc;
+    private LLVMFunctionType funcType;
     private final Function function;
 
-    public CFGraph(Function function, String label)
+    public CFGraph(Function function, String label, LLVMFunctionType funcType)
     {
         this.function = function;
         this.label = label;
+        this.funcType = funcType;
         this.blocks = new LinkedList<CFBlock>();
         this.entry = new CFBlock(label + "Entry");
         this.exit = new CFBlock(label + "Exit");
         this.blocks.add(this.entry);
-        this.llvmfunc = null;
     }
 
     public Function getFunction()
@@ -55,14 +54,9 @@ public class CFGraph
         return this.exit;
     }
 
-    public LLVMFunction getLLVMFunction()
+    public LLVMFunctionType getLLVMFunction()
     {
-        return this.llvmfunc;
-    }
-
-    public void setLLVMFunction(LLVMFunction function)
-    {
-        this.llvmfunc = function;
+        return this.funcType;
     }
 
     public void printGraph()
@@ -76,5 +70,10 @@ public class CFGraph
             System.out.print("\t");
             block.printBlock();
         }
+    }
+
+    public String llvm()
+    {
+        return null;
     }
 }

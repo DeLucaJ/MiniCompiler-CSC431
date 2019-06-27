@@ -12,7 +12,7 @@ public class LLVMImmediate extends LLVMValue
 
     public String llvm()
     {
-        return this.getType().llvm() + " " + this.value;
+        return this.value;
     }
 
     public String getValue()

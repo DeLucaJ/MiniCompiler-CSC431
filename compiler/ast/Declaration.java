@@ -1,8 +1,6 @@
 package ast;
 
-import visitor.*;
 import semantics.*;
-import cfg.*;
 
 public class Declaration
 {
@@ -41,6 +39,8 @@ public class Declaration
          state.symbols.peek().put(this.name, this.type);
       }
    }
+
+   public String getName(){ return this.name; }
 
    public Type getType(){ return this.type; }
 }

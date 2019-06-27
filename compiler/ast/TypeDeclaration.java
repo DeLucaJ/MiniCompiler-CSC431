@@ -1,9 +1,7 @@
 package ast;
 
 import java.util.*;
-import visitor.*;
 import semantics.*;
-import cfg.*;
 
 public class TypeDeclaration
 {
@@ -16,6 +14,16 @@ public class TypeDeclaration
       this.lineNum = lineNum;
       this.name = name;
       this.fields = fields;
+   }
+
+   public String getName()
+   {
+      return this.name;
+   }
+
+   public List<Declaration> getFields()
+   {
+      return this.fields;
    }
 
    public void define(State state)

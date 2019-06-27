@@ -45,7 +45,7 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
         pred.addEdge(block);
 
         //add block to the blocks list
-        cfg.getBlocks().add(block);*/
+        cfg.getBlocks().add(block);*/   
 
         //new way
         //get predecessor

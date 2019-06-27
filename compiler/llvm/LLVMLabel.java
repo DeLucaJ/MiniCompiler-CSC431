@@ -1,9 +1,14 @@
 package llvm;
 
-public class LLVMLabel implements LLVMType
+public class LLVMLabel extends LLVMNamedValue
 {
+    public LLVMLabel(String name)
+    {
+        super(new LLVMLabelType(), name);
+    }
+
     public String llvm()
     {
-        return "label";
+        return "%" + this.getName();
     }
 }

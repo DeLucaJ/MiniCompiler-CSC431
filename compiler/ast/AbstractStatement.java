@@ -1,6 +1,4 @@
 package ast;
-import cfg.*;
-import visitor.*;
 
 public abstract class AbstractStatement
    implements Statement

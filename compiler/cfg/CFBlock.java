@@ -3,18 +3,17 @@ package cfg;
 import llvm.*;
 import java.util.*;
 
-public class CFBlock
+public class CFBlock implements LLVMElement
 {
     private String label;
-    private LLVMBlock llvmblock;
-    //private LinkedList<Instruction> instructions;
+    private LinkedList<LLVMInstruction> instructions;
     private LinkedList<CFEdge> edges;   
 
     public CFBlock(String label)
     {
         this.label = label;
-        //this.instructions = new LinkedList<Instruction>();
         this.edges = new LinkedList<CFEdge>();
+        this.instructions = new LinkedList<LLVMInstruction>();
     }
 
     public String getLabel()
@@ -27,10 +26,10 @@ public class CFBlock
         return this.edges;
     }
 
-    /*public List<Instruction> getInstructions()
+    public LinkedList<LLVMInstruction> getInstructions()
     {
         return this.instructions;
-    }*/
+    }
 
     public void addEdge(CFBlock sink)
     {
@@ -50,5 +49,15 @@ public class CFBlock
             edge.printEdge();
             System.out.println("");
         }
+    }
+
+    public String llvm()
+    {
+        String blockstring = this.label + ":\n";
+        for (LLVMInstruction instruction : instructions)
+        {
+            blockstring += String.format("\t%s\n", instruction.llvm());
+        }
+        return blockstring;
     }
 }

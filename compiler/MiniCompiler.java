@@ -45,8 +45,8 @@ public class MiniCompiler
          if (!passed) return;
          
          // Milestone 2 & 3 - Control Flow
-         List<CFGraph> cfgs = new LinkedList<CFGraph>();
-         program.cfTransform(cfgs);
+         //List<CFGraph> cfgs = new LinkedList<CFGraph>();
+         program.transform();
       }
    }
 

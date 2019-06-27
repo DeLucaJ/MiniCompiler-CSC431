@@ -1,14 +1,16 @@
 package ast;
 
-import java.util.List;
+import java.util.*;
 import semantics.*;
 import cfg.*;
+import llvm.*;
 
 public class Program
 {
    private final List<TypeDeclaration> types;
    private final List<Declaration> decls;
    private final List<Function> funcs;
+   private LLVMProgram llvmprog;
 
    public Program(List<TypeDeclaration> types, List<Declaration> decls,
       List<Function> funcs)
@@ -16,6 +18,7 @@ public class Program
       this.types = types;
       this.decls = decls;
       this.funcs = funcs;
+      this.llvmprog = null;
    }
 
    public boolean analyze()
@@ -46,17 +49,52 @@ public class Program
       }
    }
 
-   public void cfTransform(List<CFGraph> cfgs)
+   public void transform()
    {
-      for (int i = 0; i < this.funcs.size(); i++)
-      { 
-         CFGraph cfg = new CFGraph(this.funcs.get(i), this.funcs.get(i).getName());
-         cfgs.add(cfg);
-         this.funcs.get(i).cfTransform(cfg);
+      //initialize llvm program
+      this.llvmprog = new LLVMProgram();
+
+      //create the header?
+
+      //create llvm type decls for each type decl
+      for (TypeDeclaration type : this.types)
+      {
+         this.llvmprog.getTypeDecls().add(LLVMUtility.typeToLLVM(type));
       }
 
+      //create llvm decls for each decls
+      for (Declaration decl : this.decls)
+      {
+         this.llvmprog.getDecls().add(LLVMUtility.declToLLVM(decl));
+      }
+
+      for (Function func : this.funcs)
+      { 
+         //Create an LLVMFunctionType for the CFG
+         LinkedList<LLVMDeclaration> params = new LinkedList<LLVMDeclaration>();
+         for (Declaration param : func.getParams())
+         {
+            params.add(LLVMUtility.declToLLVM(param));
+         }
+         LLVMFunctionType funcType = new LLVMFunctionType(
+            LLVMUtility.astToLLVM(func.getRetType()),
+            params
+         );
+
+         //initialize the cfg
+         CFGraph cfg = new CFGraph(
+            func, 
+            func.getName(),
+            funcType
+         );
+         this.llvmprog.getFuncs().add(cfg);
+         func.transform(cfg);
+      }
+
+      //create the footer?
+
       // display graphs
-      for (CFGraph cfg : cfgs)
+      for (CFGraph cfg : this.llvmprog.getFuncs())
       {
          cfg.printGraph();
       }

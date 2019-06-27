@@ -1,32 +1,16 @@
 package llvm;
 
-import java.util.LinkedList;
-
 public class LLVMStructure implements LLVMType
 {
-    public final LinkedList<LLVMType> types;
+    private String name;
 
-    public LLVMStructure(LinkedList<LLVMType> types)
+    public LLVMStructure(String name)
     {
-        this.types = types;
+        this.name = name;
     }
 
     public String llvm()
     {
-        String decl = "{ ";
-        if (types.size() == 1)
-        {
-            decl += types.getFirst().llvm() + " ";
-            
-        }
-        else if (types.size() > 1)
-        {
-            for (LLVMType type : types)
-            {
-                decl += type.llvm() + ", ";
-            }
-        }
-        decl += "}";
-        return decl;
+        return "%struct." + this.name;
     }
 }

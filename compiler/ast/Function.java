@@ -1,7 +1,6 @@
 package ast;
 
 import java.util.*;
-import visitor.*;
 import semantics.*;
 import cfg.*;
 
@@ -28,6 +27,16 @@ public class Function
    public String getName()
    {
       return this.name;
+   }
+
+   public Type getRetType()
+   {
+      return this.retType;
+   }
+
+   public List<Declaration> getParams()
+   {
+      return this.params;
    }
 
    public void define(State state)
@@ -92,7 +101,7 @@ public class Function
       }
    }
 
-   public void cfTransform(CFGraph cfg)
+   public void transform(CFGraph cfg)
    {
       CFStatementVisitor visitor = new CFStatementVisitor(cfg);
       // declarations should be included at the beginning of the body block 

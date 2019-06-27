@@ -1,7 +1,5 @@
 package ast;
 
-import visitor.*;
-
 public abstract class AbstractExpression
    implements Expression
 {
