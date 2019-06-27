@@ -3,6 +3,7 @@ package ast;
 import java.util.*;
 import semantics.*;
 import cfg.*;
+import llvm.*;
 
 public class Function
 {
@@ -101,9 +102,9 @@ public class Function
       }
    }
 
-   public void transform(CFGraph cfg)
+   public void transform(CFGraph cfg, LLVMState state)
    {
-      CFStatementVisitor visitor = new CFStatementVisitor(cfg);
+      CFStatementVisitor visitor = new CFStatementVisitor(cfg, state);
       // declarations should be included at the beginning of the body block 
       // this may only be necessary for the stack command so hold off until translation
       

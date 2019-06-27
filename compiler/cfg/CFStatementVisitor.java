@@ -1,19 +1,22 @@
 package cfg;
 
 import ast.*;
+import llvm.LLVMState;
 import visitor.*;
 import java.util.*;
 
 public class CFStatementVisitor implements StatementVisitor<CFBlock>
 {
     private CFGraph cfg;
+    private LLVMState state;
     private CFExpressionVisitor expVisitor;
     private int index = 0;
 
-    public CFStatementVisitor(CFGraph cfg)
+    public CFStatementVisitor(CFGraph cfg, LLVMState state)
     { 
         this.cfg = cfg;
-        this.expVisitor = new CFExpressionVisitor(this.cfg); 
+        this.state = state;
+        this.expVisitor = new CFExpressionVisitor(this.cfg, this.state); 
     }
 
     public String blockLabel()

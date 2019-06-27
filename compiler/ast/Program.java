@@ -53,19 +53,24 @@ public class Program
    {
       //initialize llvm program
       this.llvmprog = new LLVMProgram();
+      LLVMState state = new LLVMState();
 
       //create the header?
 
       //create llvm type decls for each type decl
       for (TypeDeclaration type : this.types)
       {
-         this.llvmprog.getTypeDecls().add(LLVMUtility.typeToLLVM(type));
+         LLVMTypeDeclaration llvmdecl = LLVMUtility.typeToLLVM(type);
+         state.structs.put(llvmdecl.getName(), new LLVMStructure(llvmdecl.getName(), llvmdecl.getProps()));
+         this.llvmprog.getTypeDecls().add(llvmdecl);
       }
-
+ 
       //create llvm decls for each decls
       for (Declaration decl : this.decls)
       {
-         this.llvmprog.getDecls().add(LLVMUtility.declToLLVM(decl));
+         LLVMDeclaration llvmdecl = LLVMUtility.declToLLVM(decl);
+         state.global.put(llvmdecl.getName(), new LLVMIdentifier(llvmdecl.getType(), llvmdecl.getName(), true));
+         this.llvmprog.getDecls().add(llvmdecl);
       }
 
       for (Function func : this.funcs)
@@ -80,6 +85,7 @@ public class Program
             LLVMUtility.astToLLVM(func.getRetType()),
             params
          );
+         state.funcs.put(func.getName(), funcType);
 
          //initialize the cfg
          CFGraph cfg = new CFGraph(
@@ -88,7 +94,7 @@ public class Program
             funcType
          );
          this.llvmprog.getFuncs().add(cfg);
-         func.transform(cfg);
+         func.transform(cfg, state);
       }
 
       //create the footer?

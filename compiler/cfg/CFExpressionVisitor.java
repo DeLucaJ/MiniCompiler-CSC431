@@ -8,10 +8,14 @@ import java.util.*;
 public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
 {
     private CFGraph cfg;
+    private LLVMState state;
     private int registerIndex = 0;
 
-    public CFExpressionVisitor(CFGraph cfg){ this.cfg = cfg; }
-
+    public CFExpressionVisitor(CFGraph cfg, LLVMState state)
+    { 
+        this.cfg = cfg;
+        this.state = state;
+    }
 
     public LLVMValue visit (BinaryExpression expression)
     {
