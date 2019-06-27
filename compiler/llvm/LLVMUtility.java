@@ -6,27 +6,27 @@ import ast.*;
 
 public class LLVMUtility
 {
-    public static LLVMDeclaration declToLLVM(Declaration decl)
+    public static LLVMDeclaration declToLLVM(Declaration decl, LLVMState state)
     {
-        return new LLVMDeclaration(decl.getName(), astToLLVM(decl.getType()));
+        return new LLVMDeclaration(decl.getName(), astToLLVM(decl.getType(), state));
     }
 
-    public static LLVMTypeDeclaration typeToLLVM(TypeDeclaration type)
+    public static LLVMTypeDeclaration typeToLLVM(TypeDeclaration type, LLVMState state)
     {
         ArrayList<LLVMIdentifier> props = new ArrayList<LLVMIdentifier>();
         for (Declaration field : type.getFields())
         {
-            props.add(declToIdentifier(field));
+            props.add(declToIdentifier(field, state));
         }
         return new LLVMTypeDeclaration(type.getName(), props);
     }
 
-    public static LLVMIdentifier declToIdentifier(Declaration decl)
+    public static LLVMIdentifier declToIdentifier(Declaration decl, LLVMState state)
     {
-        return new LLVMIdentifier(astToLLVM(decl.getType()), decl.getName(), false);
+        return new LLVMIdentifier(astToLLVM(decl.getType(), state), decl.getName(), false);
     }
 
-    public static LLVMType astToLLVM(Type type)
+    public static LLVMType astToLLVM(Type type, LLVMState state)
     {
         if(type instanceof VoidType)
         {
@@ -39,7 +39,7 @@ public class LLVMUtility
         else if(type instanceof StructType)
         {   
             StructType stype = (StructType) type;
-            return new LLVMStructure(stype.getName());
+            return state.structs.get(stype.getName());
         }
         return null;
     }

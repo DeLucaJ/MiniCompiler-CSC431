@@ -60,7 +60,7 @@ public class Program
       //create llvm type decls for each type decl
       for (TypeDeclaration type : this.types)
       {
-         LLVMTypeDeclaration llvmdecl = LLVMUtility.typeToLLVM(type);
+         LLVMTypeDeclaration llvmdecl = LLVMUtility.typeToLLVM(type, state);
          state.structs.put(llvmdecl.getName(), new LLVMStructure(llvmdecl.getName(), llvmdecl.getProps()));
          this.llvmprog.getTypeDecls().add(llvmdecl);
       }
@@ -68,7 +68,7 @@ public class Program
       //create llvm decls for each decls
       for (Declaration decl : this.decls)
       {
-         LLVMDeclaration llvmdecl = LLVMUtility.declToLLVM(decl);
+         LLVMDeclaration llvmdecl = LLVMUtility.declToLLVM(decl, state);
          state.global.put(llvmdecl.getName(), new LLVMIdentifier(llvmdecl.getType(), llvmdecl.getName(), true));
          this.llvmprog.getDecls().add(llvmdecl);
       }
@@ -79,10 +79,10 @@ public class Program
          LinkedList<LLVMDeclaration> params = new LinkedList<LLVMDeclaration>();
          for (Declaration param : func.getParams())
          {
-            params.add(LLVMUtility.declToLLVM(param));
+            params.add(LLVMUtility.declToLLVM(param, state));
          }
          LLVMFunctionType funcType = new LLVMFunctionType(
-            LLVMUtility.astToLLVM(func.getRetType()),
+            LLVMUtility.astToLLVM(func.getRetType(), state),
             params
          );
          state.funcs.put(func.getName(), funcType);
