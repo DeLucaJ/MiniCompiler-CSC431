@@ -73,11 +73,28 @@ public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
         //There is some nonsense happening right now
         LLVMValue leftVal = expression.getLeft().accept(this);
 
+        //leftVal might need to be a pointer to a structure
         if (leftVal.getType() instanceof LLVMStructure)
         {
+            LLVMStructure structType = (LLVMStructure) leftVal.getType();
+            ArrayList<LLVMIdentifier> ids = state.structs.get(structType.getName()).getProps();
+            for (int i = 0; i < ids.size(); i++)
+            {
+                if(ids.get(i).getName() == expression.getId())
+                {
+                    //create pointer type
+                    LLVMPointer pointerType = new LLVMPointer(leftVal.getType());
 
+                    //create target of pointer type
+                    LLVMValue target = new LLVMRegister(pointerType, "" + this.registerIndex++);
+
+                    //create instruction using i as a string
+                    LLVMInstruction inst = new LLVMGetElementPtrInstruction(target, pointerType, leftVal, "" + i);
+                    this.cfg.getBlocks().getLast().getInstructions().add(inst);
+                    return target;
+                }
+            }
         }
-
         return null;
     }
 
@@ -89,13 +106,42 @@ public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
     public LLVMValue visit (IdentifierExpression expression)
     {
         // checking for global might be rough
+        if(state.symbols.containsKey(expression.getId()))
+        {
+            return state.symbols.get(expression.getId());
+        }
+
+        if (state.global.containsKey(expression.getId()))
+        {
+            return state.global.get(expression.getId());
+        }
+
         return null;
     }
 
     public LLVMValue visit (InvocationExpression expression)
     {
         //figure out call stuff
-        return null;
+
+        //find function type
+        LLVMFunctionType functionType = state.funcs.get(expression.getName());
+
+        //convert arguments
+        LinkedList<LLVMValue> args = new LinkedList<LLVMValue>();
+        for (Expression argument : expression.getArguments())
+        {
+            LLVMValue value = argument.accept(this);
+            args.add(value);
+        }
+
+        //create target
+        LLVMValue target = new LLVMRegister(functionType.getRetType(), "" + this.registerIndex++);
+
+        //create instruction
+        LLVMInstruction inst = new LLVMCallInstruction(target, functionType, args);
+        this.cfg.getBlocks().getLast().getInstructions().add(inst);
+
+        return target;
     }
 
     public LLVMValue visit (IntegerExpression expression)
@@ -105,19 +151,43 @@ public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
 
     public LLVMValue visit (NewExpression expression)
     {
-        //struct things
-        return null;
+        //create and push the call instruction
+        LLVMStructure struct = state.structs.get(expression.getId());
+
+        LinkedList<LLVMDeclaration> params = new LinkedList<LLVMDeclaration>();
+        params.add(new LLVMDeclaration("size", new LLVMInteger32()));
+
+        LLVMFunctionType malloc = new LLVMFunctionType(new LLVMPointer(new LLVMInteger8()), params);
+
+        LLVMValue target1 = new LLVMRegister(new LLVMPointer(new LLVMInteger8()), "" + this.registerIndex++);
+
+        LinkedList<LLVMValue> args = new LinkedList<LLVMValue>();
+        args.add(new LLVMImmediate(new LLVMInteger32(), "" + (4 * struct.getProps().size())));
+
+        LLVMCallInstruction call = new LLVMCallInstruction(target1, malloc, args);
+
+        this.cfg.getBlocks().getLast().getInstructions().add(call);
+
+        //create and push the bitcast
+        LLVMValue target2 = new LLVMRegister(new LLVMPointer(struct), "" + this.registerIndex++);
+
+        LLVMBitcastInstruction bitcast = new LLVMBitcastInstruction(target2, new LLVMPointer(new LLVMInteger8()), target1, new LLVMPointer(struct));
+
+        this.cfg.getBlocks().getLast().getInstructions().add(bitcast);
+
+        return target2;
     }
 
     public LLVMValue visit (NullExpression expression)
     {
-        //how does making things null work
-        return null;
+        //the type should match the type being assigned too
+        return new LLVMNullValue(null);
     }
 
     public LLVMValue visit (ReadExpression expression)
     {
-        return null;
+        //how do I return a value to get this to work
+        return new LLVMReadValue();
     }
 
     public LLVMValue visit (TrueExpression expression)

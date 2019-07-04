@@ -17,4 +17,14 @@ public class LLVMStructure implements LLVMType
     {
         return "%struct." + this.name;
     }
+
+    public String getName()
+    {
+        return this.name;
+    }
+
+    public ArrayList<LLVMIdentifier> getProps()
+    {
+        return this.properties;
+    }
 }

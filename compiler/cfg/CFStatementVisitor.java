@@ -1,7 +1,7 @@
 package cfg;
 
 import ast.*;
-import llvm.LLVMState;
+import llvm.*;
 import visitor.*;
 import java.util.*;
 
@@ -26,6 +26,10 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
 
     public CFBlock visit (AssignmentStatement statement)
     {
+        // probably need to check for a read expression\
+
+        // check for null value
+
         //return null;
         CFBlock block = cfg.getBlocks().getLast();
         return block;
@@ -33,24 +37,8 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
 
     public CFBlock visit (BlockStatement statement)
     {
-        //Graph Construction
-        
-        //old way, create a block everytime this was entered, should have just chained
-        //get the predecessor
-        //this should always be the predecessor (i hope)
-        //every statement should add a block to the list and then return it
-        /*CFBlock pred = cfg.getBlocks().getLast();
+        //Graph Construction  
 
-        //create the block for this entry
-        CFBlock block = new CFBlock(blockLabel());
-        
-        //create an edge pred -> block
-        pred.addEdge(block);
-
-        //add block to the blocks list
-        cfg.getBlocks().add(block);*/   
-
-        //new way
         //get predecessor
         CFBlock block = cfg.getBlocks().getLast();
         
@@ -80,6 +68,10 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
         //add guard to blocks list
         cfg.getBlocks().add(guard);
 
+        //GUARD ACCEPT AND PUSH GOES HERE
+        //run accept on the guard
+        LLVMValue guardVal = statement.getGuard().accept(expVisitor);
+    
         //create then block, guard -> then, add to list, accept
         CFBlock thenBlock = new CFBlock(blockLabel());
         guard.addEdge(thenBlock);
@@ -87,7 +79,8 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
         CFBlock thenLast = statement.getThen().accept(this);
 
         //check if else block is empty
-        CFBlock elseBlock, elseLast = null;
+        CFBlock elseBlock = null;
+        CFBlock elseLast = null;
         BlockStatement ebs = (BlockStatement) statement.getElse();
         if (ebs.getStatements().size() != 0)
         {
@@ -103,19 +96,26 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
         thenLast.addEdge(join);
         
         //check if elseLast is null
+        LLVMLabel thenLabel = new LLVMLabel(thenBlock.getLabel());
+        LLVMLabel elseLabel = null;
         if (elseLast != null)
         {
             //if is not, elseLast -> join
             elseLast.addEdge(join);
+            elseLabel = new LLVMLabel(elseBlock.getLabel());
         }
         else 
         {
             //if is, guard -> join
             guard.addEdge(join);
+            elseLabel = new LLVMLabel(join.getLabel());
         }
 
         //add join to list
         cfg.getBlocks().add(join);
+
+        LLVMInstruction branch = new LLVMConditionalBranchInstruction(guardVal, thenLabel, elseLabel);
+        guard.getInstructions().add(branch);
 
         return join;
     }
@@ -161,6 +161,9 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
         //return cfg.getExit();
 
         //using this unless the other is necessary
+        LLVMInstruction inst = new LLVMReturnVoidInstruction();
+        cfg.getBlocks().getLast().getInstructions().add(inst);
+
         return pred;
     }
     
@@ -177,6 +180,12 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
         //return cfg.getExit();
 
         //using this unless the other is necessary
+
+        //visit expression add return instruction with the value
+        LLVMValue value = statement.getExpression().accept(this.expVisitor);
+        LLVMInstruction inst = new LLVMReturnInstruction(value.getType(), value);
+        this.cfg.getBlocks().getLast().getInstructions().add(inst);
+
         return pred;
     }
     
@@ -188,6 +197,9 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
 
         //create the guard block
         CFBlock guard = new CFBlock(blockLabel());
+
+        //guard instructions
+        LLVMValue guardVal = statement.getGuard().accept(expVisitor);
 
         //add edge pred -> guard
         pred.addEdge(guard);
@@ -203,11 +215,22 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
 
         //add bodyLast -> guard
         bodyLast.addEdge(guard);
+        
+        //add basic branch instruction to guard
+        LLVMLabel gaurdLabel = new LLVMLabel(guard.getLabel());
+        LLVMInstruction guardBranch = new LLVMBranchInstruction(gaurdLabel);
+        bodyLast.getInstructions().add(guardBranch);
 
         //create endloop, guard -> endloop, endloop to list
         CFBlock endloop = new CFBlock(blockLabel());
         guard.addEdge(endloop);
         cfg.getBlocks().add(endloop);
+
+        //branch instruction and so on
+        LLVMLabel endLabel = new LLVMLabel(endloop.getLabel());
+        LLVMLabel bodyLabel = new LLVMLabel(body.getLabel());
+        LLVMInstruction loopBranch = new LLVMConditionalBranchInstruction(guardVal, bodyLabel, endLabel);
+        guard.getInstructions().add(loopBranch);
 
         //return endloop
         return endloop;

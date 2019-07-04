@@ -2,12 +2,12 @@ package llvm;
 
 public class LLVMConditionalBranchInstruction implements LLVMInstruction
 {
-    private final LLVMCond condition;
-    private final LLVMValue iftrue;
-    private final LLVMValue iffalse;
+    private final LLVMValue condition;
+    private final LLVMLabel iftrue;
+    private final LLVMLabel iffalse;
     private final String opcode;
 
-    public LLVMConditionalBranchInstruction(LLVMCond condition, LLVMValue iftrue, LLVMValue iffalse)
+    public LLVMConditionalBranchInstruction(LLVMValue condition, LLVMLabel iftrue, LLVMLabel iffalse)
     {
         this.opcode = "br";
         this.condition = condition;
