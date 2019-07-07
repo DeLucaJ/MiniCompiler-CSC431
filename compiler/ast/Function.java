@@ -2,7 +2,6 @@ package ast;
 
 import java.util.*;
 import semantics.*;
-import cfg.*;
 import llvm.*;
 
 public class Function
@@ -40,7 +39,7 @@ public class Function
       return this.params;
    }
 
-   public void define(State state)
+   public void define(semantics.State state)
    {
       if (state.containsFunction(this.name))
       {
@@ -66,15 +65,15 @@ public class Function
       return new FunctionType(this.retType, paramTypes);
    }
 
-   public void analyze(State state)
+   public void analyze(semantics.State state)
    {
       SemanticStatementVisitor visitor = new SemanticStatementVisitor(state);
       state.currentFunc = this.funcType();
       state.pushTable();
       //add params to state
-      for (Declaration param : this.params){ param.defineSymbol(state); }
+      for (ast.Declaration param : this.params){ param.defineSymbol(state); }
       //add locals to state
-      for (Declaration local : this.locals){ local.defineSymbol(state); }
+      for (ast.Declaration local : this.locals){ local.defineSymbol(state); }
       body.accept(visitor);
       state.popTable();
       boolean returns = true;
@@ -82,12 +81,12 @@ public class Function
       {
          if(this.body instanceof BlockStatement)
          {
-            BlockStatement bbody = (BlockStatement) this.body;
+            ast.BlockStatement bbody = (BlockStatement) this.body;
             returns = bbody.returns;
          }
          else if (this.body instanceof ConditionalStatement)
          {
-            ConditionalStatement cbody = (ConditionalStatement) this.body;
+            ast.ConditionalStatement cbody = (ConditionalStatement) this.body;
             returns = cbody.returns;
          }
       }
@@ -102,14 +101,14 @@ public class Function
       }
    }
 
-   public void transform(CFGraph cfg, LLVMState state)
+   public void transform(llvm.Function cfg, llvm.State state)
    {
-      CFStatementVisitor visitor = new CFStatementVisitor(cfg, state);
+      LLVMStatementVisitor visitor = new LLVMStatementVisitor(cfg, state);
       // declarations should be included at the beginning of the body block 
       // this may only be necessary for the stack command so hold off until translation
       
       // create block for body
-      CFBlock block = new CFBlock(visitor.blockLabel());
+      llvm.Block block = new llvm.Block(visitor.blockLabel());
       
       // create an edge entry -> block
       cfg.getEntry().addEdge(block);
@@ -118,7 +117,7 @@ public class Function
       cfg.getBlocks().add(block);
       
       // run the control flow visitor on the body and get the last block that it creates
-      CFBlock last = this.body.accept(visitor);
+      llvm.Block last = this.body.accept(visitor);
       
       // this is wrong because last should already have been added to the list
       //cfg.getBlocks().add(last);

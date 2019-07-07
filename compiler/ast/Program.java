@@ -2,7 +2,6 @@ package ast;
 
 import java.util.*;
 import semantics.*;
-import cfg.*;
 import llvm.*;
 
 public class Program
@@ -10,7 +9,7 @@ public class Program
    private final List<TypeDeclaration> types;
    private final List<Declaration> decls;
    private final List<Function> funcs;
-   private LLVMProgram llvmprog;
+   private llvm.Program llvmprog;
 
    public Program(List<TypeDeclaration> types, List<Declaration> decls,
       List<Function> funcs)
@@ -24,19 +23,19 @@ public class Program
    public boolean analyze()
    {
       //initialize state
-      State state = new State();
+      semantics.State state = new semantics.State();
 
       //add types to state.structs
-      for (TypeDeclaration type : this.types){ type.define(state); }
+      for (ast.TypeDeclaration type : this.types){ type.define(state); }
 
       //add decls to global state
-      for (Declaration decl : this.decls){ decl.defineSymbol(state); }
+      for (ast.Declaration decl : this.decls){ decl.defineSymbol(state); }
 
       //add functions to global state? optional for filescope
-      for (Function func : this.funcs){ func.define(state); }
+      for (ast.Function func : this.funcs){ func.define(state); }
 
       //analyze all funcs
-      for (Function func : this.funcs){ func.analyze(state); }
+      for (ast.Function func : this.funcs){ func.analyze(state); }
 
       if (state.errors.size() == 0)
       {
@@ -52,44 +51,44 @@ public class Program
    public void transform()
    {
       //initialize llvm program
-      this.llvmprog = new LLVMProgram();
-      LLVMState state = new LLVMState();
+      this.llvmprog = new llvm.Program();
+      llvm.State state = new llvm.State();
 
       //create the header?
 
       //create llvm type decls for each type decl
       for (TypeDeclaration type : this.types)
       {
-         LLVMTypeDeclaration llvmdecl = LLVMUtility.typeToLLVM(type, state);
-         state.structs.put(llvmdecl.getName(), new LLVMStructure(llvmdecl.getName(), llvmdecl.getProps()));
+         llvm.TypeDeclaration llvmdecl = llvm.Utility.typeToLLVM(type, state);
+         state.structs.put(llvmdecl.getName(), new llvm.Structure(llvmdecl.getName(), llvmdecl.getProps()));
          this.llvmprog.getTypeDecls().add(llvmdecl);
       }
  
       //create llvm decls for each decls
       for (Declaration decl : this.decls)
       {
-         LLVMDeclaration llvmdecl = LLVMUtility.declToLLVM(decl, state);
-         state.global.put(llvmdecl.getName(), new LLVMIdentifier(llvmdecl.getType(), llvmdecl.getName(), true));
+         llvm.Declaration llvmdecl = llvm.Utility.declToLLVM(decl, state);
+         state.global.put(llvmdecl.getName(), new llvm.Identifier(llvmdecl.getType(), llvmdecl.getName(), true));
          this.llvmprog.getDecls().add(llvmdecl);
       }
 
       for (Function func : this.funcs)
       { 
-         //Create an LLVMFunctionType for the CFG
-         LinkedList<LLVMDeclaration> params = new LinkedList<LLVMDeclaration>();
+         //Create an llvm.FunctionType for the CFG
+         LinkedList<llvm.Declaration> params = new LinkedList<llvm.Declaration>();
          for (Declaration param : func.getParams())
          {
-            params.add(LLVMUtility.declToLLVM(param, state));
+            params.add(llvm.Utility.declToLLVM(param, state));
          }
-         LLVMFunctionType funcType = new LLVMFunctionType(
+         llvm.FunctionType funcType = new llvm.FunctionType(
             func.getName(),
-            LLVMUtility.astToLLVM(func.getRetType(), state),
+            llvm.Utility.astToLLVM(func.getRetType(), state),
             params
          );
          state.funcs.put(func.getName(), funcType);
 
          //initialize the cfg
-         CFGraph cfg = new CFGraph(
+         llvm.Function cfg = new llvm.Function(
             func, 
             func.getName(),
             funcType
@@ -101,7 +100,7 @@ public class Program
       //create the footer?
 
       // display graphs
-      for (CFGraph cfg : this.llvmprog.getFuncs())
+      for (llvm.Function cfg : this.llvmprog.getFuncs())
       {
          cfg.printGraph();
       }
