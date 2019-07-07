@@ -9,7 +9,7 @@ public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
 {
     private CFGraph cfg;
     private LLVMState state;
-    private int registerIndex = 0;
+    public int registerIndex = 0;
 
     public CFExpressionVisitor(CFGraph cfg, LLVMState state)
     { 
@@ -23,7 +23,7 @@ public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
         LLVMValue op2 = expression.getLeft().accept(this);
         LLVMValue target = new LLVMRegister(op1.getType(), "" + this.registerIndex++);
 
-        LLVMInstruction inst = null;
+        LLVMInstruction inst = null; // might cause a problem
 
         switch (expression.getOperator())
         {
@@ -74,28 +74,11 @@ public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
         LLVMValue leftVal = expression.getLeft().accept(this);
 
         //leftVal might need to be a pointer to a structure
-        if (leftVal.getType() instanceof LLVMStructure)
-        {
-            LLVMStructure structType = (LLVMStructure) leftVal.getType();
-            ArrayList<LLVMIdentifier> ids = state.structs.get(structType.getName()).getProps();
-            for (int i = 0; i < ids.size(); i++)
-            {
-                if(ids.get(i).getName() == expression.getId())
-                {
-                    //create pointer type
-                    LLVMPointer pointerType = new LLVMPointer(leftVal.getType());
+        LLVMPointer pointer = (LLVMPointer) leftVal.getType();
 
-                    //create target of pointer type
-                    LLVMValue target = new LLVMRegister(pointerType, "" + this.registerIndex++);
-
-                    //create instruction using i as a string
-                    LLVMInstruction inst = new LLVMGetElementPtrInstruction(target, pointerType, leftVal, "" + i);
-                    this.cfg.getBlocks().getLast().getInstructions().add(inst);
-                    return target;
-                }
-            }
-        }
-        return null;
+        LLVMStructure struct = (LLVMStructure) pointer.getPointerType();
+        
+        return null; //not implemented right now
     }
 
     public LLVMValue visit (FalseExpression expression)
@@ -116,7 +99,7 @@ public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
             return state.global.get(expression.getId());
         }
 
-        return null;
+        return null; //possible problem
     }
 
     public LLVMValue visit (InvocationExpression expression)
@@ -154,17 +137,12 @@ public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
         //create and push the call instruction
         LLVMStructure struct = state.structs.get(expression.getId());
 
-        LinkedList<LLVMDeclaration> params = new LinkedList<LLVMDeclaration>();
-        params.add(new LLVMDeclaration("size", new LLVMInteger32()));
-
-        LLVMFunctionType malloc = new LLVMFunctionType(new LLVMPointer(new LLVMInteger8()), params);
-
         LLVMValue target1 = new LLVMRegister(new LLVMPointer(new LLVMInteger8()), "" + this.registerIndex++);
 
         LinkedList<LLVMValue> args = new LinkedList<LLVMValue>();
         args.add(new LLVMImmediate(new LLVMInteger32(), "" + (4 * struct.getProps().size())));
 
-        LLVMCallInstruction call = new LLVMCallInstruction(target1, malloc, args);
+        LLVMCallInstruction call = new LLVMCallInstruction(target1, this.state.funcs.get("malloc"), args);
 
         this.cfg.getBlocks().getLast().getInstructions().add(call);
 
@@ -181,7 +159,7 @@ public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
     public LLVMValue visit (NullExpression expression)
     {
         //the type should match the type being assigned too
-        return new LLVMNullValue(null);
+        return new LLVMNullValue(null); //possible problem
     }
 
     public LLVMValue visit (ReadExpression expression)
@@ -200,7 +178,7 @@ public class CFExpressionVisitor implements ExpressionVisitor<LLVMValue>
         LLVMValue operand = expression.getOperand().accept(this);
         LLVMValue target = new LLVMRegister(operand.getType(), "" + this.registerIndex++);
 
-        LLVMInstruction inst = null;
+        LLVMInstruction inst = null; //might cause a problem
 
         switch (expression.getOperator())
         {

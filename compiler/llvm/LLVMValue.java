@@ -14,6 +14,11 @@ public abstract class LLVMValue implements LLVMElement
         return this.type;
     }
 
+    public void setType(LLVMType type)
+    {
+        this.type = type;
+    }
+
     public String llvm()
     {
         return null;

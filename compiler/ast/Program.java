@@ -82,6 +82,7 @@ public class Program
             params.add(LLVMUtility.declToLLVM(param, state));
          }
          LLVMFunctionType funcType = new LLVMFunctionType(
+            func.getName(),
             LLVMUtility.astToLLVM(func.getRetType(), state),
             params
          );

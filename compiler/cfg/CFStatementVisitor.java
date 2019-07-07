@@ -26,12 +26,69 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
 
     public CFBlock visit (AssignmentStatement statement)
     {
-        // probably need to check for a read expression\
+        // probably need to check for a read expression
+        // check for null value !!!!
 
-        // check for null value
+        // Parse the LValues to do the proper load instructions
+            // only the load for an LValueID
+            // load struct get element until we get to the end of LValue Dots
+        LLVMRegister target = null;
+        
+        if (statement.getTarget() instanceof LvalueId)
+        {
+            LvalueId lvalue = (LvalueId) statement.getTarget();
+            LLVMIdentifier id = null; 
+            
+            if (state.symbols.contains(lvalue.getId()))
+            {
+                id = state.symbols.get(lvalue.getId());
+            }
+            else if(state.global.contains(lvalue.getId()))
+            {
+                id = state.global.get(lvalue.getId());
+            }
+            
+            target = new LLVMRegister(id.getType(), "" + this.expVisitor.registerIndex++);
+            
+            LLVMLoadInstruction inst = new LLVMLoadInstruction(target, id, new LLVMPointer(id.getType()));
+            
+            this.cfg.getBlocks().getLast().getInstructions().add(inst);
+        }
+        else if (statement.getTarget() instanceof LvalueDot)
+        {
+            LvalueDot lvalue = (LvalueDot) statement.getTarget();
+            
+            LLVMValue leftVal = lvalue.getLeft().accept(this.expVisitor);
+            
+            int index = -1;
 
-        //return null;
+            if(!(leftVal.getType() instanceof LLVMStructure)) return null;
+
+            LLVMStructure leftS = (LLVMStructure) leftVal.getType();
+            for (int i = 0; i < leftS.getProps().size(); i++)
+            {
+                if (leftS.getProps().get(i).getName() == lvalue.getId())
+                {
+                    index = i; break;
+                }
+            }
+
+            target = new LLVMRegister(leftS.getProps().get(index).getType(), "" + this.expVisitor.registerIndex++);
+
+            LLVMGetElementPtrInstruction getelement = new LLVMGetElementPtrInstruction(target, new LLVMPointer(leftS.getProps().get(index).getType()), leftVal, "" + index);
+
+            this.cfg.getBlocks().getLast().getInstructions().add(getelement);
+        }
+
+        // store the expression value into the pointer resolved by the LValue
+            //check for read and null here
+        LLVMValue expVal = statement.getSource().accept(this.expVisitor);
+
+        LLVMStoreInstruction store = new LLVMStoreInstruction(target.getType(), target, new LLVMPointer(expVal.getType()), expVal);
+
         CFBlock block = cfg.getBlocks().getLast();
+        block.getInstructions().add(store);
+
         return block;
     }
 
@@ -122,28 +179,72 @@ public class CFStatementVisitor implements StatementVisitor<CFBlock>
     
     public CFBlock visit (DeleteStatement statement)
     {
-        //return null;
+        //accept the expression
+        LLVMValue value = statement.getExpression().accept(this.expVisitor);
+
+        //load the id being deleted
+        if (!(value instanceof LLVMIdentifier)) return null;
+
+        LLVMIdentifier idValue = (LLVMIdentifier) value;
+
+        LLVMRegister target1 = new LLVMRegister(idValue.getType(), "" + this.expVisitor.registerIndex++);
+
+        LLVMLoadInstruction load = new LLVMLoadInstruction(target1, idValue, new LLVMPointer(idValue.getType()));
+
+        this.cfg.getBlocks().getLast().getInstructions().add(load);
+
+        //bitcast the value to an int8
+        LLVMRegister target2 = new LLVMRegister(new LLVMInteger8(), "" + this.expVisitor.registerIndex++);
+
+        LLVMBitcastInstruction bitcast = new LLVMBitcastInstruction(target2, target2.getType(), target1, target1.getType());
+
+        this.cfg.getBlocks().getLast().getInstructions().add(bitcast);
+
+        //call void @free(i8* arg)
+        LinkedList<LLVMValue> args = new LinkedList<>();
+        args.add(idValue);
+
+        LLVMCallInstruction free = new LLVMCallInstruction(this.state.funcs.get("free"), args);
+
+        this.cfg.getBlocks().getLast().getInstructions().add(free);
+
         CFBlock block = cfg.getBlocks().getLast();
         return block;
     }
     
     public CFBlock visit (InvocationStatement statement)
     {
-        //return null;
+        // This is when a line just calls a function and does not assign a value
+
+        //construct this in a similar manner to the LLVMCallInstruction but with no assignment at the end
+
+        //leave this alone for now but will almost certainly be a problem
+        LLVMValue expVal = statement.getExpression().accept(this.expVisitor);
+
         CFBlock block = cfg.getBlocks().getLast();
         return block;
     }
     
     public CFBlock visit (PrintStatement statement)
     {
-        //return null;
+        //call the printf function here just with print
+        LLVMValue expVal = statement.getExpression().accept(this.expVisitor);
+
+        LLVMPrintInstruction print = new LLVMPrintInstruction(false, expVal);
+        this.cfg.getBlocks().getLast().getInstructions().add(print); 
+
         CFBlock block = cfg.getBlocks().getLast();
         return block;
     }
     
     public CFBlock visit (PrintLnStatement statement)
     {
-        //return null;
+        //call the printf function here with println
+        LLVMValue expVal = statement.getExpression().accept(this.expVisitor);
+
+        LLVMPrintInstruction println = new LLVMPrintInstruction(true, expVal);
+        this.cfg.getBlocks().getLast().getInstructions().add(println);
+
         CFBlock block = cfg.getBlocks().getLast();
         return block;
     }

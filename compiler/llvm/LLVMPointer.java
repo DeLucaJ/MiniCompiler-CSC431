@@ -13,4 +13,9 @@ public class LLVMPointer implements LLVMType
     {
         return pointerType.llvm() + "*";
     }
+
+    public LLVMType getPointerType()
+    {
+        return this.pointerType;
+    }
 }
