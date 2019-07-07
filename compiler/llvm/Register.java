@@ -9,6 +9,6 @@ public class Register extends NamedValue
 
     public String llvm()
     {
-        return "%" + String.format("%s", this.getName());
+        return "%" + this.getName();
     }
 }
