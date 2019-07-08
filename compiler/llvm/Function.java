@@ -23,6 +23,11 @@ public class Function implements Element
         this.blocks.add(this.entry);
     }
 
+    public void close()
+    {
+        this.blocks.add(this.exit);
+    }
+
     public ast.Function getFunction()
     {
         return this.function;
@@ -73,6 +78,26 @@ public class Function implements Element
 
     public String llvm()
     {
-        return null;
+        String paramsString = "";
+        for (int i = 0; i < this.funcType.getParams().size(); i++)
+        {
+            Declaration param = this.funcType.getParams().get(i);
+            paramsString += String.format("%s %s", param.getType().llvm(), "%" + param.getName());
+            paramsString += (i < (this.funcType.getParams().size() - 1)) ? "," : "";
+        }
+
+        String blocksString = "";
+        for (Block block : this.blocks)
+        {
+            blocksString += block.llvm();
+        }
+
+        return String.format(
+            "define %s @%s(%s)\n{\n%s}\n",
+            this.funcType.getRetType().llvm(),
+            this.label,
+            paramsString,
+            blocksString
+        );
     }
 }

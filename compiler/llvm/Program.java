@@ -6,7 +6,7 @@ public class Program implements Element
 {
     private LinkedList<TypeDeclaration> types;
     private LinkedList<Declaration> decls;
-    private LinkedList<Function> cfgs;
+    private LinkedList<Function> funcs;
     //header
     //footer
 
@@ -14,7 +14,7 @@ public class Program implements Element
     {
         this.types = new LinkedList<TypeDeclaration>();
         this.decls = new LinkedList<Declaration>();
-        this.cfgs = new LinkedList<Function>();
+        this.funcs = new LinkedList<Function>();
     }
 
     public LinkedList<TypeDeclaration> getTypeDecls()
@@ -29,11 +29,37 @@ public class Program implements Element
 
     public LinkedList<Function> getFuncs()
     {
-        return this.cfgs;
+        return this.funcs;
     }
 
     public String llvm()
     {
-        return null;
+        String typesString = "";
+        for (TypeDeclaration type : types)
+        {
+            typesString += type.llvm() + "\n";
+        }
+
+        String declsString = "";
+        for (Declaration decl : decls)
+        {
+            declsString += decl.llvm() + "\n";
+        }
+
+        String funcsString = "";
+        for (Function func : funcs)
+        {
+            funcsString += func.llvm() + "\n";
+        }
+
+        String footer = "declare i8* @malloc(i32)\ndeclare void @free(i8*)\ndeclare i32 @printf(i8*, ...)\ndeclare i32 @scanf(i8*, ...)\n@.println = private unnamed_addr constant [5 x i8] c\"%ld\\0A\\00\", align 1\n@.print = private unnamed_addr constant [5 x i8] c\"%ld \\00\", align 1\n@.read = private unnamed_addr constant [4 x i8] c\"%ld\\00\", align 1\n@.read_scratch = common global i32 0, align 4";
+
+        return String.format(
+            "target triple=\"i686\"\n%s\n%s\n%s\n%s",
+            typesString,
+            declsString,
+            funcsString,
+            footer
+        );
     }
 }

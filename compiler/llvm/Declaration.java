@@ -24,6 +24,6 @@ public class Declaration implements Element
     //possible problems
     public String llvm()
     {
-        return "@" + this.name + " = common global " + this.type.llvm() + "null, align 4";
+        return "@" + this.name + " = common global " + this.type.llvm() + " null, align 4";
     }
 }

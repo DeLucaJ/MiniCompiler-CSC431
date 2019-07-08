@@ -13,17 +13,13 @@ public class Utility
 
     public static llvm.TypeDeclaration typeToLLVM(ast.TypeDeclaration type, llvm.State state)
     {
-        ArrayList<llvm.Identifier> props = new ArrayList<>();
+        ArrayList<llvm.Identifier> fields = new ArrayList<>();
         for (ast.Declaration field : type.getFields())
         {
-            props.add(declToIdentifier(field, state));
+            llvm.Identifier id = new Identifier(astToLLVM(field.getType(), state), field.getName(), false);
+            fields.add(id);
         }
-        return new llvm.TypeDeclaration(type.getName(), props);
-    }
-
-    public static llvm.Identifier declToIdentifier(ast.Declaration decl, llvm.State state)
-    {
-        return new llvm.Identifier(astToLLVM(decl.getType(), state), decl.getName(), false);
+        return new llvm.TypeDeclaration(type.getName(), fields);
     }
 
     public static llvm.Type astToLLVM(ast.Type type, llvm.State state)

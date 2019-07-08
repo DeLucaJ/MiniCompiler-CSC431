@@ -6,21 +6,26 @@ import java.util.*;
 
 public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
 {
-    private llvm.Function cfg;
+    private llvm.Function func;
     private llvm.State state;
     private LLVMExpressionVisitor expVisitor;
     private int index = 0;
 
     public LLVMStatementVisitor(llvm.Function cfg, llvm.State state)
     { 
-        this.cfg = cfg;
+        this.func = cfg;
         this.state = state;
-        this.expVisitor = new LLVMExpressionVisitor(this.cfg, this.state); 
+        this.expVisitor = new LLVMExpressionVisitor(this.func, this.state); 
     }
 
     public String blockLabel()
     {
-        return cfg.getLabel() + this.index++;
+        return func.getLabel() + this.index++;
+    }
+
+    public LLVMExpressionVisitor getExpVisitor()
+    {
+        return this.expVisitor;
     }
 
     public llvm.Block visit (AssignmentStatement statement)
@@ -31,7 +36,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         // Parse the LValues to do the proper load instructions
             // only the load for an LValueID
             // load struct get element until we get to the end of LValue Dots
-        llvm.Register target = null;
+        /*llvm.Register target = null;
         
         if (statement.getTarget() instanceof LvalueId)
         {
@@ -51,7 +56,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
             
             llvm.LoadInstruction inst = new llvm.LoadInstruction(target, id, new llvm.Pointer(id.getType()));
             
-            this.cfg.getBlocks().getLast().getInstructions().add(inst);
+            this.func.getBlocks().getLast().getInstructions().add(inst);
         }
         else if (statement.getTarget() instanceof LvalueDot)
         {
@@ -76,7 +81,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
 
             llvm.GetElementPtrInstruction getelement = new llvm.GetElementPtrInstruction(target, new llvm.Pointer(leftS.getProps().get(index).getType()), leftVal, "" + index);
 
-            this.cfg.getBlocks().getLast().getInstructions().add(getelement);
+            this.func.getBlocks().getLast().getInstructions().add(getelement);
         }
 
         // store the expression value into the pointer resolved by the LValue
@@ -85,10 +90,11 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
 
         llvm.StoreInstruction store = new llvm.StoreInstruction(target.getType(), target, new llvm.Pointer(expVal.getType()), expVal);
 
-        llvm.Block block = cfg.getBlocks().getLast();
+        llvm.Block block = func.getBlocks().getLast();
         block.getInstructions().add(store);
 
-        return block;
+        return block;*/
+        return null;
     }
 
     public llvm.Block visit (BlockStatement statement)
@@ -96,7 +102,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         //Graph Construction  
 
         //get predecessor
-        llvm.Block block = cfg.getBlocks().getLast();
+        llvm.Block block = func.getBlocks().getLast();
         
         //loop through statements list (only change the statement list when necessary)
         llvm.Block last = block;
@@ -113,7 +119,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
     {
         //Graph Construction
         //get the predecessor
-        llvm.Block pred = cfg.getBlocks().getLast();
+        /*llvm.Block pred = func.getBlocks().getLast();
         
         //create the entry node for the conditional
         llvm.Block guard = new llvm.Block(blockLabel());
@@ -122,7 +128,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         pred.addEdge(guard);
 
         //add guard to blocks list
-        cfg.getBlocks().add(guard);
+        func.getBlocks().add(guard);
 
         //GUARD ACCEPT AND PUSH GOES HERE
         //run accept on the guard
@@ -131,7 +137,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         //create then block, guard -> then, add to list, accept
         llvm.Block thenBlock = new llvm.Block(blockLabel());
         guard.addEdge(thenBlock);
-        cfg.getBlocks().add(thenBlock);
+        func.getBlocks().add(thenBlock);
         llvm.Block thenLast = statement.getThen().accept(this);
 
         //check if else block is empty
@@ -143,7 +149,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
             //create else block, guard -> else, add to list, accept
             elseBlock = new llvm.Block(blockLabel());
             guard.addEdge(elseBlock);
-            cfg.getBlocks().add(elseBlock);
+            func.getBlocks().add(elseBlock);
             elseLast = statement.getElse().accept(this);
         }
 
@@ -168,18 +174,19 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         }
 
         //add join to list
-        cfg.getBlocks().add(join);
+        func.getBlocks().add(join);
 
         llvm.Instruction branch = new llvm.ConditionalBranchInstruction(guardVal, thenLabel, elseLabel);
         guard.getInstructions().add(branch);
 
-        return join;
+        return join;*/
+        return null;
     }
     
     public llvm.Block visit (DeleteStatement statement)
     {
         //accept the expression
-        llvm.Value value = statement.getExpression().accept(this.expVisitor);
+        /*llvm.Value value = statement.getExpression().accept(this.expVisitor);
 
         //load the id being deleted
         if (!(value instanceof llvm.Identifier)) return null;
@@ -190,14 +197,14 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
 
         llvm.LoadInstruction load = new llvm.LoadInstruction(target1, idValue, new llvm.Pointer(idValue.getType()));
 
-        this.cfg.getBlocks().getLast().getInstructions().add(load);
+        this.func.getBlocks().getLast().getInstructions().add(load);
 
         //bitcast the value to an int8
         llvm.Register target2 = new llvm.Register(new llvm.Integer8(), "" + this.expVisitor.registerIndex++);
 
         llvm.BitcastInstruction bitcast = new llvm.BitcastInstruction(target2, target2.getType(), target1, target1.getType());
 
-        this.cfg.getBlocks().getLast().getInstructions().add(bitcast);
+        this.func.getBlocks().getLast().getInstructions().add(bitcast);
 
         //call void @free(i8* arg)
         LinkedList<llvm.Value> args = new LinkedList<>();
@@ -205,10 +212,11 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
 
         llvm.CallInstruction free = new llvm.CallInstruction(this.state.funcs.get("free"), args);
 
-        this.cfg.getBlocks().getLast().getInstructions().add(free);
+        this.func.getBlocks().getLast().getInstructions().add(free);
 
-        llvm.Block block = cfg.getBlocks().getLast();
-        return block;
+        llvm.Block block = func.getBlocks().getLast();
+        return block;*/
+        return null;
     }
     
     public llvm.Block visit (InvocationStatement statement)
@@ -218,63 +226,67 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         //construct this in a similar manner to the llvm.CallInstruction but with no assignment at the end
 
         //leave this alone for now but will almost certainly be a problem
-        llvm.Value expVal = statement.getExpression().accept(this.expVisitor);
+        /*llvm.Value expVal = statement.getExpression().accept(this.expVisitor);
 
-        llvm.Block block = cfg.getBlocks().getLast();
-        return block;
+        llvm.Block block = func.getBlocks().getLast();
+        return block;*/
+        return null;
     }
     
     public llvm.Block visit (PrintStatement statement)
     {
         //call the printf function here just with print
-        llvm.Value expVal = statement.getExpression().accept(this.expVisitor);
+        /*llvm.Value expVal = statement.getExpression().accept(this.expVisitor);
 
         llvm.PrintInstruction print = new llvm.PrintInstruction(false, expVal);
-        this.cfg.getBlocks().getLast().getInstructions().add(print); 
+        this.func.getBlocks().getLast().getInstructions().add(print); 
 
-        llvm.Block block = cfg.getBlocks().getLast();
-        return block;
+        llvm.Block block = func.getBlocks().getLast();
+        return block;*/
+        return null;
     }
     
     public llvm.Block visit (PrintLnStatement statement)
     {
         //call the printf function here with println
-        llvm.Value expVal = statement.getExpression().accept(this.expVisitor);
+        /*llvm.Value expVal = statement.getExpression().accept(this.expVisitor);
 
         llvm.PrintInstruction println = new llvm.PrintInstruction(true, expVal);
-        this.cfg.getBlocks().getLast().getInstructions().add(println);
+        this.func.getBlocks().getLast().getInstructions().add(println);
 
-        llvm.Block block = cfg.getBlocks().getLast();
-        return block;
+        llvm.Block block = func.getBlocks().getLast();
+        return block;*/
+        return null;
     }
     
     public llvm.Block visit (ReturnEmptyStatement statement)
     {
         //Graph Construction
         //get predecessor
-        llvm.Block pred = cfg.getBlocks().getLast();
+        /*llvm.Block pred = func.getBlocks().getLast();
 
         //create pred -> exit
-        pred.addEdge(cfg.getExit());
+        pred.addEdge(func.getExit());
 
         //this may create problems
         //return cfg.getExit();
 
         //using this unless the other is necessary
         llvm.Instruction inst = new llvm.ReturnVoidInstruction();
-        cfg.getBlocks().getLast().getInstructions().add(inst);
+        func.getBlocks().getLast().getInstructions().add(inst);
 
-        return pred;
+        return pred;*/
+        return null;
     }
     
     public llvm.Block visit (ReturnStatement statement)
     {
         //Graph Construction
         //get predecessor
-        llvm.Block pred = cfg.getBlocks().getLast();
+        /*llvm.Block pred = func.getBlocks().getLast();
 
         //create pred -> exit
-        pred.addEdge(cfg.getExit());
+        pred.addEdge(func.getExit());
 
         //this may create problems
         //return cfg.getExit();
@@ -284,16 +296,17 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         //visit expression add return instruction with the value
         llvm.Value value = statement.getExpression().accept(this.expVisitor);
         llvm.Instruction inst = new llvm.ReturnInstruction(value.getType(), value);
-        this.cfg.getBlocks().getLast().getInstructions().add(inst);
+        this.func.getBlocks().getLast().getInstructions().add(inst);
 
-        return pred;
+        return pred;*/
+        return null;
     }
     
     public llvm.Block visit (WhileStatement statement)
     {
         //Graph Construction
         //get the predecessor 
-        llvm.Block pred = cfg.getBlocks().getLast();
+        /*llvm.Block pred = func.getBlocks().getLast();
 
         //create the guard block
         llvm.Block guard = new llvm.Block(blockLabel());
@@ -305,12 +318,12 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         pred.addEdge(guard);
 
         //add guard to list
-        cfg.getBlocks().add(guard);
+        func.getBlocks().add(guard);
 
         //create the body block, guard -> body, body to list, bodyLast <- accept
         llvm.Block body = new llvm.Block(blockLabel());
         guard.addEdge(body);
-        cfg.getBlocks().add(body);
+        func.getBlocks().add(body);
         llvm.Block bodyLast = statement.getBody().accept(this);
 
         //add bodyLast -> guard
@@ -324,7 +337,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         //create endloop, guard -> endloop, endloop to list
         llvm.Block endloop = new llvm.Block(blockLabel());
         guard.addEdge(endloop);
-        cfg.getBlocks().add(endloop);
+        func.getBlocks().add(endloop);
 
         //branch instruction and so on
         llvm.Label endLabel = new llvm.Label(endloop.getLabel());
@@ -333,6 +346,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         guard.getInstructions().add(loopBranch);
 
         //return endloop
-        return endloop;
+        return endloop;*/
+        return null;
     }
 }

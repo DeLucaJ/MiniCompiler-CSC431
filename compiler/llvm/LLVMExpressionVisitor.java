@@ -18,7 +18,7 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
 
     public llvm.Value visit (BinaryExpression expression)
     {
-        llvm.Value op1 = expression.getLeft().accept(this);
+        /*llvm.Value op1 = expression.getLeft().accept(this);
         llvm.Value op2 = expression.getLeft().accept(this);
         llvm.Value target = new llvm.Register(op1.getType(), "" + this.registerIndex++);
 
@@ -64,20 +64,22 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
                 break;
         }
         this.cfg.getBlocks().getLast().getInstructions().add(inst);
-        return target;
+        return target;*/
+        return null;
     }
 
     public llvm.Value visit (DotExpression expression)
     {
         //There is some nonsense happening right now
-        llvm.Value leftVal = expression.getLeft().accept(this);
+        /*llvm.Value leftVal = expression.getLeft().accept(this);
 
         //leftVal might need to be a pointer to a structure
         llvm.Pointer pointer = (llvm.Pointer) leftVal.getType();
 
         llvm.Structure struct = (llvm.Structure) pointer.getPointerType();
         
-        return null; //not implemented right now
+        return null; //not implemented right now*/
+        return null;
     }
 
     public llvm.Value visit (FalseExpression expression)
@@ -88,7 +90,7 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
     public llvm.Value visit (IdentifierExpression expression)
     {
         // checking for global might be rough
-        if(state.symbols.containsKey(expression.getId()))
+        /*if(state.symbols.containsKey(expression.getId()))
         {
             return state.symbols.get(expression.getId());
         }
@@ -98,7 +100,8 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
             return state.global.get(expression.getId());
         }
 
-        return null; //possible problem
+        return null; //possible problem*/
+        return null;
     }
 
     public llvm.Value visit (InvocationExpression expression)
@@ -106,7 +109,7 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
         //figure out call stuff
 
         //find function type
-        llvm.FunctionType functionType = state.funcs.get(expression.getName());
+        /*llvm.FunctionType functionType = state.funcs.get(expression.getName());
 
         //convert arguments
         LinkedList<llvm.Value> args = new LinkedList<llvm.Value>();
@@ -123,7 +126,8 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
         llvm.Instruction inst = new llvm.CallInstruction(target, functionType, args);
         this.cfg.getBlocks().getLast().getInstructions().add(inst);
 
-        return target;
+        return target;*/
+        return null;
     }
 
     public llvm.Value visit (IntegerExpression expression)
@@ -134,7 +138,7 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
     public llvm.Value visit (NewExpression expression)
     {
         //create and push the call instruction
-        llvm.Structure struct = state.structs.get(expression.getId());
+        /*llvm.Structure struct = state.structs.get(expression.getId());
 
         llvm.Value target1 = new llvm.Register(new llvm.Pointer(new llvm.Integer8()), "" + this.registerIndex++);
 
@@ -152,13 +156,14 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
 
         this.cfg.getBlocks().getLast().getInstructions().add(bitcast);
 
-        return target2;
+        return target2;*/
+        return null;
     }
 
     public llvm.Value visit (NullExpression expression)
     {
         //the type should match the type being assigned too
-        return new llvm.NullValue(null); //possible problem
+        return new llvm.Immediate(new llvm.Pointer(new llvm.Void()), "null");
     }
 
     public llvm.Value visit (ReadExpression expression)
@@ -169,12 +174,12 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
 
     public llvm.Value visit (TrueExpression expression)
     {
-        return new llvm.Immediate(new llvm.Integer32(), "4294967295");
+        return new llvm.Immediate(new llvm.Integer32(), "-1");
     }
 
     public llvm.Value visit (UnaryExpression expression)
     {
-        llvm.Value operand = expression.getOperand().accept(this);
+        /*llvm.Value operand = expression.getOperand().accept(this);
         llvm.Value target = new llvm.Register(operand.getType(), "" + this.registerIndex++);
 
         llvm.Instruction inst = null; //might cause a problem
@@ -192,6 +197,7 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
         }
 
         this.cfg.getBlocks().getLast().getInstructions().add(inst);
-        return target;
+        return target;*/
+        return null;
     }
 }

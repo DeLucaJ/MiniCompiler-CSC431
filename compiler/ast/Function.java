@@ -1,6 +1,7 @@
 package ast;
 
 import java.util.*;
+
 import semantics.*;
 import llvm.*;
 
@@ -101,32 +102,67 @@ public class Function
       }
    }
 
-   public void transform(llvm.Function cfg, llvm.State state)
+   public void transform(llvm.Function func, llvm.State state)
    {
-      LLVMStatementVisitor visitor = new LLVMStatementVisitor(cfg, state);
-      // declarations should be included at the beginning of the body block 
-      // this may only be necessary for the stack command so hold off until translation
+      LLVMStatementVisitor visitor = new LLVMStatementVisitor(func, state);
       
-      // create block for body
-      llvm.Block block = new llvm.Block(visitor.blockLabel());
+      //alloca retVal
+      llvm.Identifier retVal = null;
+      llvm.Pointer retValType = null;
+      if (!(this.retType instanceof VoidType))
+      {
+         retValType = new llvm.Pointer(func.getFuncType().getRetType());
+         retVal = new llvm.Identifier(retValType, "_retval_", false);
+         AllocationInstruction retAlloca = new AllocationInstruction(retVal, func.getFuncType().getRetType());
+         func.getEntry().getInstructions().add(retAlloca);
+         state.symbols.put("_retval_", retValType);
+      }
+
+      //alloca params
+      for (llvm.Declaration param : func.getFuncType().getParams())
+      {
+         //might need to add a parameter prefix
+         llvm.Pointer paramType = new llvm.Pointer(param.getType());
+         llvm.Identifier paramVal = new llvm.Identifier(paramType, param.getName(), false);
+         AllocationInstruction paramAlloca = new AllocationInstruction(paramVal, paramType.getPointerType());
+         func.getEntry().getInstructions().add(paramAlloca);
+         state.symbols.put(param.getName(), paramType);
+      }
       
-      // create an edge entry -> block
-      cfg.getEntry().addEdge(block);
-      
-      // add block to the linked list
-      cfg.getBlocks().add(block);
-      
+      //alloca locals
+      for (Declaration local : this.locals)
+      {
+         llvm.Declaration localllvm = Utility.declToLLVM(local, state);
+
+         llvm.Pointer localType = new llvm.Pointer(localllvm.getType());
+         llvm.Identifier localVal = new llvm.Identifier(localType, localllvm.getName(), false);
+         AllocationInstruction localAlloca = new AllocationInstruction(localVal, localType.getPointerType());
+         func.getEntry().getInstructions().add(localAlloca);
+         state.symbols.put(local.getName(), localType);
+      }
+
       // run the control flow visitor on the body and get the last block that it creates
       llvm.Block last = this.body.accept(visitor);
-      
-      // this is wrong because last should already have been added to the list
-      //cfg.getBlocks().add(last);
-      
-      //return statement visit already does this
-      //connect edge to the exit of the list
-      //last.addEdge(cfg.getExit());
+
+      //add a return instruction at the end
+      Instruction retinst;
+      if (func.getFuncType().getRetType() instanceof llvm.Void)
+      {
+         retinst = new ReturnVoidInstruction();
+      }
+      else
+      {
+         llvm.Register retreg = new llvm.Register(func.getFuncType().getRetType(), "" + visitor.getExpVisitor().registerIndex++);
+         llvm.LoadInstruction loadinst = new llvm.LoadInstruction(retreg, retVal, retValType);
+         func.getExit().getInstructions().add(loadinst);
+         retinst = new ReturnInstruction(func.getFuncType().getRetType(), retVal);
+      }
+      func.getExit().getInstructions().add(retinst);
 
       //add exit to the end of the linked list
-      cfg.getBlocks().add(cfg.getExit());
+      func.close();
+      
+      //this is here to make sure locals from other functions do not interfere
+      state.symbols.clear();
    }
 }

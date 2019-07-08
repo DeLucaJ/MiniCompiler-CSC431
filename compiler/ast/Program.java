@@ -9,7 +9,6 @@ public class Program
    private final List<TypeDeclaration> types;
    private final List<Declaration> decls;
    private final List<Function> funcs;
-   private llvm.Program llvmprog;
 
    public Program(List<TypeDeclaration> types, List<Declaration> decls,
       List<Function> funcs)
@@ -17,7 +16,6 @@ public class Program
       this.types = types;
       this.decls = decls;
       this.funcs = funcs;
-      this.llvmprog = null;
    }
 
    public boolean analyze()
@@ -51,7 +49,7 @@ public class Program
    public void transform()
    {
       //initialize llvm program
-      this.llvmprog = new llvm.Program();
+      llvm.Program llvmprog = new llvm.Program();
       llvm.State state = new llvm.State();
 
       //create the header?
@@ -59,17 +57,17 @@ public class Program
       //create llvm type decls for each type decl
       for (TypeDeclaration type : this.types)
       {
-         llvm.TypeDeclaration llvmdecl = llvm.Utility.typeToLLVM(type, state);
-         state.structs.put(llvmdecl.getName(), new llvm.Structure(llvmdecl.getName(), llvmdecl.getProps()));
-         this.llvmprog.getTypeDecls().add(llvmdecl);
+         llvm.TypeDeclaration newStruct = Utility.typeToLLVM(type, state);
+         state.structs.put(newStruct.getName(), newStruct.toType());
+         llvmprog.getTypeDecls().add(newStruct);
       }
  
       //create llvm decls for each decls
-      for (Declaration decl : this.decls)
+      for (ast.Declaration decl : this.decls)
       {
-         llvm.Declaration llvmdecl = llvm.Utility.declToLLVM(decl, state);
-         state.global.put(llvmdecl.getName(), new llvm.Identifier(llvmdecl.getType(), llvmdecl.getName(), true));
-         this.llvmprog.getDecls().add(llvmdecl);
+         llvm.Declaration newGlobal = Utility.declToLLVM(decl, state);
+         state.global.put(newGlobal.getName(), new Pointer(newGlobal.getType()));
+         llvmprog.getDecls().add(newGlobal);
       }
 
       for (Function func : this.funcs)
@@ -81,28 +79,31 @@ public class Program
             params.add(llvm.Utility.declToLLVM(param, state));
          }
          llvm.FunctionType funcType = new llvm.FunctionType(
-            func.getName(),
             llvm.Utility.astToLLVM(func.getRetType(), state),
             params
          );
          state.funcs.put(func.getName(), funcType);
 
          //initialize the cfg
-         llvm.Function cfg = new llvm.Function(
+         llvm.Function newFunc = new llvm.Function(
             func, 
             func.getName(),
             funcType
          );
-         this.llvmprog.getFuncs().add(cfg);
-         func.transform(cfg, state);
+         llvmprog.getFuncs().add(newFunc);
+         func.transform(newFunc, state);
       }
 
-      //create the footer?
+      System.out.println("Control Flow Graph:--------------------");
 
       // display graphs
-      for (llvm.Function cfg : this.llvmprog.getFuncs())
+      for (llvm.Function func : llvmprog.getFuncs())
       {
-         cfg.printGraph();
+         func.printGraph();
       }
+
+      System.out.println("LLVM Output:---------------------------");
+
+      System.out.println(llvmprog.llvm());
    }
 }
