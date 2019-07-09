@@ -10,8 +10,9 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Benchmarks folder
-*/benchmarks
+# Benchmarks folder & output folder
+/benchmarks/*
+/output/*
 
 # Package Files #
 *.jar

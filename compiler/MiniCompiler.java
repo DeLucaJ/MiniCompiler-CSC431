@@ -47,7 +47,9 @@ public class MiniCompiler
          // Milestone 2 & 3 - Control Flow
          //List<CFGraph> cfgs = new LinkedList<CFGraph>();
          llvm.Program llvmprog = program.transform();
-         String newFilename = "../../my_" + args[0].replaceAll(".mini", ".ll").replaceAll("../", "");
+         
+         new File("./output").mkdir();
+         String newFilename = "./output/my_" + args[0].replaceAll(".mini", ".ll").replaceAll("../", "");
 
          File output = new File(newFilename);
          FileWriter fw = new FileWriter(output);
