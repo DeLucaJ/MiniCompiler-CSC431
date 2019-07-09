@@ -147,7 +147,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
 
         Value expVal = statement.getExpression().accept(this.expVisitor);
         expVal = expVisitor.loadID(expVal);
-        Register castReg = new Register(new Integer8(), "u" + state.registerIndex++);
+        Register castReg = new Register(new Pointer(new Integer8()), "u" + state.registerIndex++);
 
         Instruction bitcast = new BitcastInstruction(castReg, expVal.getType(), expVal, castReg.getType());
         current.getInstructions().add(bitcast);
