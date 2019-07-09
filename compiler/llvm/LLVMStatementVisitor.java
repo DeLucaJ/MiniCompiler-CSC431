@@ -60,6 +60,17 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
              return block;
         }
 
+        //check for void type (null)
+        if (source.getType() instanceof Pointer)
+        {
+            Pointer p = (Pointer) source.getType();
+            if (p.getPointerType() instanceof Void)
+            {
+                Type lpt = ((Pointer) lvalue.getType()).getPointerType();
+                source.setType(lpt);
+            }
+        }
+
         //create the store instruction
         Instruction store = new StoreInstruction(source.getType(), source, lvalue.getType(), lvalue);
 
