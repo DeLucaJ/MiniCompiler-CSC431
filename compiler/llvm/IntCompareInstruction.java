@@ -15,7 +15,7 @@ public class IntCompareInstruction implements Instruction
         this.op1 = op1;
         this.op2 = op2;
         this.condition = condition;
-        this.type = new Integer32();
+        this.type = op1.getType();
         this.opcode = "icmp";
     }
 
