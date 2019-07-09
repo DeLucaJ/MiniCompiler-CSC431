@@ -49,7 +49,9 @@ public class MiniCompiler
          llvm.Program llvmprog = program.transform();
          
          new File("./output").mkdir();
-         String newFilename = "./output/my_" + args[0].replaceAll(".mini", ".ll").replaceAll("../", "");
+         String newFilename = "./output/" + args[0].replaceAll("\\./", "").replaceAll(".mini", ".ll").replaceAll("\\.\\./", "");
+         
+         new File(newFilename.replaceAll(".ll", "").replaceAll("/\\w*$", "")).mkdirs();
 
          File output = new File(newFilename);
          FileWriter fw = new FileWriter(output);
