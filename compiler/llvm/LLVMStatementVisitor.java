@@ -229,6 +229,18 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         //store expVal into retval
         Pointer retValType = state.symbols.get("_retval_");
         Identifier retVal = new Identifier(retValType, "_retval_", false);
+
+        //check for null
+        if (expVal.getType() instanceof Pointer)
+        {
+            Pointer p = (Pointer) expVal.getType();
+            if (p.getPointerType() instanceof Void)
+            {
+                Type lpt = retValType.getPointerType();
+                expVal.setType(lpt);
+            }
+        }
+
         Instruction store = new StoreInstruction(expVal.getType(), expVal, retValType, retVal);
         current.getInstructions().add(store);
 
