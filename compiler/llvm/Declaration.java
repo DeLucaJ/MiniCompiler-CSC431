@@ -30,7 +30,7 @@ public class Declaration implements Element
         }
         else
         {
-            return "@" + this.name + " = common global " + this.type.llvm();
+            return "@" + this.name + " = common global " + this.type.llvm() + " 0, align 4";
         }
     }
 }
