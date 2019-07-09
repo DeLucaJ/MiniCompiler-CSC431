@@ -25,7 +25,8 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
         op2 = loadID(op2);
 
         Instruction inst;
-        Register target = new Register(new Integer32(), "u" + state.registerIndex++);
+        //Register target = new Register(new Integer32(), "u" + state.registerIndex++);
+        Register target = new Register(op1.getType(), "u" + state.registerIndex++);
 
         switch (expression.getOperator())
         {
@@ -42,25 +43,36 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
                 inst = new SubInstruction(target, op1, op2);
                 break;
             case LT:
+                target.setType(new Integer1());
+                //System.out.println(target.getType().llvm() + " " + expression.getLineNum());
                 inst = new IntCompareInstruction(target, Cond.SLT, op1, op2); 
                 break;
             case GT:
+                target.setType(new Integer1());
+                //System.out.println(target.getType().llvm() + " " + expression.getLineNum());
                 inst = new IntCompareInstruction(target, Cond.SGT, op1, op2);
                 break;
             case LE:
+                target.setType(new Integer1());
+                //System.out.println(target.getType().llvm() + " " + expression.getLineNum());
                 inst = new IntCompareInstruction(target, Cond.SLE, op1, op2);
                 break;
             case GE:
+                target.setType(new Integer1());
+                //System.out.println(target.getType().llvm() + " " + expression.getLineNum());
                 inst = new IntCompareInstruction(target, Cond.SGE, op1, op2);
                 break;
             case EQ:
                 //Must be a structure or an integer
                 //Shouldn't need to type check because of semantics
+                target.setType(new Integer1());
                 inst = new IntCompareInstruction(target, Cond.EQ, op1, op2);
                 break;
             case NE:
                 //Must be a structure or an integer
                 //Shouldn't need to type check because of semantics
+                target.setType(new Integer1());
+                //System.out.println(target.getType().llvm() + " " + expression.getLineNum());
                 inst = new IntCompareInstruction(target, Cond.NE, op1, op2);
                 break;
             case AND:
@@ -126,7 +138,8 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
     public llvm.Value visit (FalseExpression expression)
     {
         //might need to zextend false constant
-        return new llvm.Immediate(new llvm.Integer32(), "0");
+        //return new llvm.Immediate(new llvm.Integer32(), "0");
+        return new llvm.Immediate(new llvm.Integer1(), "false");
     }
 
     public Value loadID(Value value)
@@ -248,7 +261,8 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
 
     public llvm.Value visit (TrueExpression expression)
     {
-        return new llvm.Immediate(new llvm.Integer32(), "-1");
+        //return new llvm.Immediate(new llvm.Integer32(), "-1");
+        return new llvm.Immediate(new llvm.Integer1(), "true");
     }
 
     public llvm.Value visit (UnaryExpression expression)
