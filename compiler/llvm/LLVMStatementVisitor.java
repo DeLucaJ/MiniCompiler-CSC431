@@ -61,7 +61,8 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         }
 
         //check for void type (null)
-        if (source.getType() instanceof Pointer)
+        source = expVisitor.reasignNull(source, ((Pointer) lvalue.getType()));
+        /* if (source.getType() instanceof Pointer)
         {
             Pointer p = (Pointer) source.getType();
             if (p.getPointerType() instanceof Void)
@@ -69,7 +70,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
                 Type lpt = ((Pointer) lvalue.getType()).getPointerType();
                 source.setType(lpt);
             }
-        }
+        } */
 
         //create the store instruction
         Instruction store = new StoreInstruction(source.getType(), source, lvalue.getType(), lvalue);
@@ -231,7 +232,8 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         Identifier retVal = new Identifier(retValType, "_retval_", false);
 
         //check for null
-        if (expVal.getType() instanceof Pointer)
+        expVal = expVisitor.reasignNull(expVal, retValType);
+        /* if (expVal.getType() instanceof Pointer)
         {
             Pointer p = (Pointer) expVal.getType();
             if (p.getPointerType() instanceof Void)
@@ -239,7 +241,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
                 Type lpt = retValType.getPointerType();
                 expVal.setType(lpt);
             }
-        }
+        } */
 
         Instruction store = new StoreInstruction(expVal.getType(), expVal, retValType, retVal);
         current.getInstructions().add(store);

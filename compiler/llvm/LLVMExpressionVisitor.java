@@ -192,19 +192,49 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
         return id;
     }
 
+    public Value reasignNull(Value v, Pointer p)
+    {
+        if (v.getType() instanceof Pointer)
+        {
+            Pointer vp = (Pointer) v.getType();
+            if (vp.getPointerType() instanceof Void)
+            {
+                Type lpt = p.getPointerType();
+                v.setType(lpt);
+            }
+        }
+        
+        return v;
+    } 
+
     public llvm.Value visit (InvocationExpression expression)
     {   
         LinkedList<Value> args = new LinkedList<>();
         boolean isStmt = !this.hasTarget;
         this.hasTarget = true;
 
+        FunctionType function = state.funcs.get(expression.getName());
+
         for (Expression argument : expression.getArguments())
         {
             Value arg = argument.accept(this);
             arg = loadID(arg);
+            int index = args.size();
+            if (function.getParams().get(index).getType() instanceof Pointer)
+            {
+                if (arg.getType() instanceof Pointer)
+                {
+                    Pointer argp = (Pointer) arg.getType();
+                    if (argp.getPointerType() instanceof Void)
+                    {
+                        Type lpt = (Pointer) function.getParams().get(index).getType();
+                        arg.setType(lpt);
+                    }
+                }
+            }
             args.add(arg);
         }
-        FunctionType function = state.funcs.get(expression.getName());
+        
         Register target = new Register(function.getRetType(), "u" + state.registerIndex++);
 
         Instruction call;
