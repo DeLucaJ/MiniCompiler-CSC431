@@ -96,7 +96,7 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
             if (id.getName().equals(expression.getId()))
             {
                 index = i;
-                target1 = new Register(id.getType(), "u" + state.registerIndex++); //just changed
+                target1 = new Register(new Pointer(id.getType()), "u" + state.registerIndex++); //just changed
                 getElement = new GetElementPtrInstruction(target1, pointer, leftVal, "" + index);
             }
         }
@@ -105,7 +105,9 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
         
         if(!expression.isSource())
         {
-            Register target2 = new Register(target1.getType(), "u" + state.registerIndex++);
+            Type pointerType = ((Pointer) target1.getType()).getPointerType();
+            Register target2 = new Register(pointerType, "u" + state.registerIndex++);
+            //Register target2 = new Register(target1.getType(), "u" + state.registerIndex++);
 
             Instruction load = new LoadInstruction(target2, target1, target1.getType());
 
