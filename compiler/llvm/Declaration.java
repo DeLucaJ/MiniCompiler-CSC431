@@ -24,6 +24,13 @@ public class Declaration implements Element
     //possible problems
     public String llvm()
     {
-        return "@" + this.name + " = common global " + this.type.llvm() + " null, align 4";
+        if (this.type instanceof Pointer)
+        {
+            return "@" + this.name + " = common global " + this.type.llvm() + " null, align 4";
+        }
+        else
+        {
+            return "@" + this.name + " = common global " + this.type.llvm();
+        }
     }
 }
