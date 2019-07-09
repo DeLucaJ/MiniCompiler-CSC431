@@ -220,7 +220,7 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
         Instruction call = new CallInstruction("malloc", target1, malloc, args);
 
         Register target2 = new Register(p, "u" + state.registerIndex++);
-        Instruction bitcast = new BitcastInstruction(target2, new Integer8(), target2, p);
+        Instruction bitcast = new BitcastInstruction(target2, new Pointer(new Integer8()), target2, p);
 
         func.getBlocks().getLast().getInstructions().add(call);
         func.getBlocks().getLast().getInstructions().add(bitcast);
