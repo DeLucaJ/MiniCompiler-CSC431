@@ -165,7 +165,7 @@ public class Function
          llvm.Register retreg = new llvm.Register(func.getFuncType().getRetType(), "u" + state.registerIndex++);
          llvm.LoadInstruction loadinst = new llvm.LoadInstruction(retreg, retVal, retValType);
          func.getExit().getInstructions().add(loadinst);
-         retinst = new ReturnInstruction(func.getFuncType().getRetType(), retVal);
+         retinst = new ReturnInstruction(func.getFuncType().getRetType(), retreg);
       }
       func.getExit().getInstructions().add(retinst);
 
