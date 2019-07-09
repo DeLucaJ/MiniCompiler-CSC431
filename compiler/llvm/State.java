@@ -25,7 +25,7 @@ public class State
         //malloc
         LinkedList<Declaration> m_params = new LinkedList<>();
         m_params.add(new Declaration("size", new Integer32()));
-        FunctionType malloc = new FunctionType(new Integer8(), m_params);
+        FunctionType malloc = new FunctionType(new Pointer(new Integer8()), m_params);
 
         //free
         LinkedList<Declaration> f_params = new LinkedList<>();
