@@ -72,6 +72,10 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
         }
 
         func.getBlocks().getLast().getInstructions().add(inst);
+
+        //check for int Compare instruction
+        //need to zextend to int32
+
         return target;
     }
 
