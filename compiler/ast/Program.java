@@ -53,7 +53,7 @@ public class Program {
       }
    }
 
-   public void transform()
+   public llvm.Program transform()
    {
       //initialize llvm program
       llvm.Program llvmprog = new llvm.Program();
@@ -111,6 +111,7 @@ public class Program {
 
       //System.out.println("LLVM Output:---------------------------");
 
-      System.out.println(llvmprog.llvm());
+      //System.out.println(llvmprog.llvm());
+      return llvmprog;
    }
 }

@@ -3,6 +3,7 @@ import org.antlr.v4.runtime.tree.*;
 
 import visitor.*;
 import semantics.*;
+import llvm.*;
 
 import java.io.*;
 import java.util.*;
@@ -10,7 +11,7 @@ import javax.json.JsonValue;
 
 public class MiniCompiler
 {
-   public static void main(String[] args)
+   public static void main(String[] args) throws IOException
    {
       parseParameters(args);
 
@@ -45,7 +46,12 @@ public class MiniCompiler
          
          // Milestone 2 & 3 - Control Flow
          //List<CFGraph> cfgs = new LinkedList<CFGraph>();
-         program.transform();
+         llvm.Program llvmprog = program.transform();
+         String newFilename = "../output/my_" + args[0].replaceAll(".mini", ".ll").replaceAll("../", "");
+         System.out.println(newFilename);
+         PrintWriter pw = new PrintWriter(newFilename, "UTF-8");
+         pw.print(llvmprog.llvm());
+         pw.close();
       }
    }
 
