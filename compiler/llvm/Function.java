@@ -25,6 +25,12 @@ public class Function implements Element
 
     public void close()
     {
+        if (this.blocks.getLast().getEdges().size() == 0)
+        {
+            this.blocks.getLast().addEdge(this.exit);
+            Instruction branch = new BranchInstruction(new Label(this.exit.getLabel()));
+            this.blocks.getLast().getInstructions().add(branch);
+        }
         this.blocks.add(this.exit);
     }
 

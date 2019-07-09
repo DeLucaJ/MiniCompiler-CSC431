@@ -8,18 +8,21 @@ public class CallInstruction implements Instruction
     private final Value target;
     private final FunctionType func;
     private final LinkedList<Value> args;
+    private final String name;
     private boolean hasTarget = true;
 
-    public CallInstruction(Value target, FunctionType func, LinkedList<Value> args)
+    public CallInstruction(String name, Value target, FunctionType func, LinkedList<Value> args)
     {
+        this.name = name;
         this.opcode = "call";
         this.target = target;
         this.func = func;
         this.args = args;
     }
 
-    public CallInstruction(FunctionType func, LinkedList<Value> args)
+    public CallInstruction(String name, FunctionType func, LinkedList<Value> args)
     {
+        this.name = name;
         this.opcode = "call";
         this.target = null;
         this.func = func;
@@ -45,8 +48,8 @@ public class CallInstruction implements Instruction
                 "%s = %s %s %s%s",
                 this.target.llvm(),
                 this.opcode,
-                this.func.getRetType(),
                 this.func.llvm(),
+                "@" + this.name,
                 argString
             );
         }
@@ -55,8 +58,8 @@ public class CallInstruction implements Instruction
             return String.format(
                 "%s %s %s%s",
                 this.opcode,
-                this.func.getRetType(),
                 this.func.llvm(),
+                "@" + this.name,
                 argString
             );
         }

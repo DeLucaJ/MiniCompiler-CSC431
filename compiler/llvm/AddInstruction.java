@@ -21,7 +21,7 @@ public class AddInstruction implements Instruction
     {
         return String.format(
             "%s = %s %s %s, %s", 
-            this.target, 
+            this.target.llvm(), 
             this.opcode, 
             this.type.llvm(), 
             this.op1.llvm(), 

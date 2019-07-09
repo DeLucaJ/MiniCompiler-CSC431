@@ -12,7 +12,7 @@ public class TypeDeclaration implements Element
     {
         this.name = name;
         this.fields = fields;
-        this.type = new Pointer(new Structure(this.name, this.fields));
+        this.type = new Pointer(new Structure(this.name));
     }
 
     public String getName()

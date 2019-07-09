@@ -55,7 +55,7 @@ public class Program implements Element
         String footer = "declare i8* @malloc(i32)\ndeclare void @free(i8*)\ndeclare i32 @printf(i8*, ...)\ndeclare i32 @scanf(i8*, ...)\n@.println = private unnamed_addr constant [5 x i8] c\"%ld\\0A\\00\", align 1\n@.print = private unnamed_addr constant [5 x i8] c\"%ld \\00\", align 1\n@.read = private unnamed_addr constant [4 x i8] c\"%ld\\00\", align 1\n@.read_scratch = common global i32 0, align 4";
 
         return String.format(
-            "target triple=\"i686\"\n%s\n%s\n%s\n%s",
+            "target triple=\"i686\"\n%s\n%s\n%s%s",
             typesString,
             declsString,
             funcsString,

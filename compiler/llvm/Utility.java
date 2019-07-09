@@ -13,7 +13,8 @@ public class Utility
 
     public static llvm.TypeDeclaration typeToLLVM(ast.TypeDeclaration type, llvm.State state)
     {
-        ArrayList<llvm.Identifier> fields = new ArrayList<>();
+        state.structs.put(type.getName(), new ArrayList<>());
+        ArrayList<llvm.Identifier> fields = state.structs.get(type.getName());
         for (ast.Declaration field : type.getFields())
         {
             llvm.Identifier id = new Identifier(astToLLVM(field.getType(), state), field.getName(), false);
@@ -35,7 +36,7 @@ public class Utility
         else if(type instanceof ast.StructType)
         {   
             StructType stype = (ast.StructType) type;
-            return state.structs.get(stype.getName());
+            return new Pointer(new Structure(stype.getName()));
         }
         return null;
     }

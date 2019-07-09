@@ -5,9 +5,9 @@ public class LoadInstruction implements Instruction
     public final String opcode;
     public final Value target;
     public final Value pointer;
-    public final Pointer pointerType;
+    public final Type pointerType;
 
-    public LoadInstruction(Value target, Value pointer, Pointer pointertype)
+    public LoadInstruction(Value target, Value pointer, Type pointertype)
     {
         this.target = target;
         this.pointer = pointer;

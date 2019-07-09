@@ -5,10 +5,10 @@ public class StoreInstruction implements Instruction
     public final String opcode;
     public final Type type;
     public final Value value;
-    public final Pointer pointerType;
+    public final Type pointerType;
     public final Value pointerValue; 
 
-    public StoreInstruction(Type type, Value value, Pointer pointerType, Value pointerValue)
+    public StoreInstruction(Type type, Value value, Type pointerType, Value pointerValue)
     {
         this.type = type;
         this.value = value;

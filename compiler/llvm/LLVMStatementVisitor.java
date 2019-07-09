@@ -30,71 +30,42 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
 
     public llvm.Block visit (AssignmentStatement statement)
     {
-        // probably need to check for a read expression
-        // check for null value !!!!
-
-        // Parse the LValues to do the proper load instructions
-            // only the load for an LValueID
-            // load struct get element until we get to the end of LValue Dots
-        /*llvm.Register target = null;
-        
+        // turn Lvalue into the proper expression
+        Expression lvalueExp;
         if (statement.getTarget() instanceof LvalueId)
         {
-            LvalueId lvalue = (LvalueId) statement.getTarget();
-            llvm.Identifier id = null; 
-            
-            if (state.symbols.contains(lvalue.getId()))
-            {
-                id = state.symbols.get(lvalue.getId());
-            }
-            else if(state.global.contains(lvalue.getId()))
-            {
-                id = state.global.get(lvalue.getId());
-            }
-            
-            target = new llvm.Register(id.getType(), "" + this.expVisitor.registerIndex++);
-            
-            llvm.LoadInstruction inst = new llvm.LoadInstruction(target, id, new llvm.Pointer(id.getType()));
-            
-            this.func.getBlocks().getLast().getInstructions().add(inst);
+            LvalueId targetId = (LvalueId) statement.getTarget();
+            lvalueExp = new IdentifierExpression(statement.getLineNum(), targetId.getId());
         }
-        else if (statement.getTarget() instanceof LvalueDot)
+        else
         {
-            LvalueDot lvalue = (LvalueDot) statement.getTarget();
-            
-            llvm.Value leftVal = lvalue.getLeft().accept(this.expVisitor);
-            
-            int index = -1;
-
-            if(!(leftVal.getType() instanceof llvm.Structure)) return null;
-
-            llvm.Structure leftS = (llvm.Structure) leftVal.getType();
-            for (int i = 0; i < leftS.getProps().size(); i++)
-            {
-                if (leftS.getProps().get(i).getName() == lvalue.getId())
-                {
-                    index = i; break;
-                }
-            }
-
-            target = new llvm.Register(leftS.getProps().get(index).getType(), "" + this.expVisitor.registerIndex++);
-
-            llvm.GetElementPtrInstruction getelement = new llvm.GetElementPtrInstruction(target, new llvm.Pointer(leftS.getProps().get(index).getType()), leftVal, "" + index);
-
-            this.func.getBlocks().getLast().getInstructions().add(getelement);
+            LvalueDot targetDot = (LvalueDot) statement.getTarget();
+            lvalueExp = new DotExpression(statement.getLineNum(), targetDot.getLeft(), targetDot.getId(), true);
         }
 
-        // store the expression value into the pointer resolved by the LValue
-            //check for read and null here
-        llvm.Value expVal = statement.getSource().accept(this.expVisitor);
+        // visit the expression generated
+        // should always be a pointer due to semantics
+        Value lvalue = lvalueExp.accept(this.expVisitor);
 
-        llvm.StoreInstruction store = new llvm.StoreInstruction(target.getType(), target, new llvm.Pointer(expVal.getType()), expVal);
+        // visit the source expression
+        Value source = statement.getSource().accept(this.expVisitor);
+        source = expVisitor.loadID(source);
 
-        llvm.Block block = func.getBlocks().getLast();
+        Block block = func.getBlocks().getLast();
+
+        if (source instanceof ReadValue)
+        {
+             Instruction read = new ReadInstruction(this.expVisitor.readId);
+             block.getInstructions().add(read);
+             return block;
+        }
+
+        //create the store instruction
+        Instruction store = new StoreInstruction(source.getType(), source, lvalue.getType(), lvalue);
+
         block.getInstructions().add(store);
 
-        return block;*/
-        return null;
+        return block;
     }
 
     public llvm.Block visit (BlockStatement statement)
@@ -117,236 +88,179 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
     
     public llvm.Block visit (ConditionalStatement statement)
     {
-        //Graph Construction
-        //get the predecessor
-        /*llvm.Block pred = func.getBlocks().getLast();
-        
-        //create the entry node for the conditional
-        llvm.Block guard = new llvm.Block(blockLabel());
+        // get the block this begins with
+        Block current = func.getBlocks().getLast();
 
-        //create and edge pred -> guard
-        pred.addEdge(guard);
+        Value guard = statement.getGuard().accept(this.expVisitor);
+        guard = expVisitor.loadID(guard);
 
-        //add guard to blocks list
-        func.getBlocks().add(guard);
-
-        //GUARD ACCEPT AND PUSH GOES HERE
-        //run accept on the guard
-        llvm.Value guardVal = statement.getGuard().accept(expVisitor);
-    
-        //create then block, guard -> then, add to list, accept
-        llvm.Block thenBlock = new llvm.Block(blockLabel());
-        guard.addEdge(thenBlock);
+        //create the then block and accept then statement
+        Block thenBlock = new Block(blockLabel());
+        current.addEdge(thenBlock);
         func.getBlocks().add(thenBlock);
-        llvm.Block thenLast = statement.getThen().accept(this);
+        Block thenLast = statement.getThen().accept(this);
 
-        //check if else block is empty
-        llvm.Block elseBlock = null;
-        llvm.Block elseLast = null;
-        BlockStatement ebs = (BlockStatement) statement.getElse();
-        if (ebs.getStatements().size() != 0)
+        //create the else block and accept else statement
+        Block elseBlock = new Block(blockLabel());
+        current.addEdge(elseBlock);
+        func.getBlocks().add(elseBlock);
+        Block elseLast = statement.getElse().accept(this);
+
+        //create the branch instruction
+        Label thenLabel = new Label(thenBlock.getLabel());
+        Label elseLabel = new Label(elseBlock.getLabel());
+        Instruction branch = new ConditionalBranchInstruction(guard, thenLabel, elseLabel);
+        current.getInstructions().add(branch);
+
+        // create join block
+        Block joinBlock = new Block(blockLabel());
+        Label joinLabel = new Label(joinBlock.getLabel());
+        //func.getBlocks().add(joinBlock);
+
+        // check the last instructions of thenLast and elseLast
+        // if they return do not branch to join
+        if (!thenLast.doesReturn())
         {
-            //create else block, guard -> else, add to list, accept
-            elseBlock = new llvm.Block(blockLabel());
-            guard.addEdge(elseBlock);
-            func.getBlocks().add(elseBlock);
-            elseLast = statement.getElse().accept(this);
+            thenLast.addEdge(joinBlock);
+            Instruction binst = new BranchInstruction(joinLabel);
+            thenLast.getInstructions().add(binst);
         }
 
-        //create join node
-        llvm.Block join = new llvm.Block(blockLabel());
-        thenLast.addEdge(join);
-        
-        //check if elseLast is null
-        llvm.Label thenLabel = new llvm.Label(thenBlock.getLabel());
-        llvm.Label elseLabel = null;
-        if (elseLast != null)
+        if (!elseLast.doesReturn())
         {
-            //if is not, elseLast -> join
-            elseLast.addEdge(join);
-            elseLabel = new llvm.Label(elseBlock.getLabel());
-        }
-        else 
-        {
-            //if is, guard -> join
-            guard.addEdge(join);
-            elseLabel = new llvm.Label(join.getLabel());
+            elseLast.addEdge(joinBlock);
+            Instruction binst = new BranchInstruction(joinLabel);
+            elseLast.getInstructions().add(binst);
         }
 
-        //add join to list
-        func.getBlocks().add(join);
+        if (!elseLast.doesReturn() || !thenLast.doesReturn())
+        {
+            func.getBlocks().add(joinBlock);
+        }
 
-        llvm.Instruction branch = new llvm.ConditionalBranchInstruction(guardVal, thenLabel, elseLabel);
-        guard.getInstructions().add(branch);
-
-        return join;*/
-        return null;
+        return joinBlock;
     }
     
     public llvm.Block visit (DeleteStatement statement)
     {
-        //accept the expression
-        /*llvm.Value value = statement.getExpression().accept(this.expVisitor);
+        Block current = func.getBlocks().getLast();
 
-        //load the id being deleted
-        if (!(value instanceof llvm.Identifier)) return null;
+        Value expVal = statement.getExpression().accept(this.expVisitor);
+        expVal = expVisitor.loadID(expVal);
+        Register castReg = new Register(new Integer8(), "u" + state.registerIndex++);
 
-        llvm.Identifier idValue = (llvm.Identifier) value;
+        Instruction bitcast = new BitcastInstruction(castReg, expVal.getType(), expVal, castReg.getType());
+        current.getInstructions().add(bitcast);
 
-        llvm.Register target1 = new llvm.Register(idValue.getType(), "" + this.expVisitor.registerIndex++);
+        LinkedList<Value> args = new LinkedList<>();
+        args.add(castReg);
+        Instruction free = new CallInstruction("free", state.funcs.get("free"), args);
+        current.getInstructions().add(free);
 
-        llvm.LoadInstruction load = new llvm.LoadInstruction(target1, idValue, new llvm.Pointer(idValue.getType()));
-
-        this.func.getBlocks().getLast().getInstructions().add(load);
-
-        //bitcast the value to an int8
-        llvm.Register target2 = new llvm.Register(new llvm.Integer8(), "" + this.expVisitor.registerIndex++);
-
-        llvm.BitcastInstruction bitcast = new llvm.BitcastInstruction(target2, target2.getType(), target1, target1.getType());
-
-        this.func.getBlocks().getLast().getInstructions().add(bitcast);
-
-        //call void @free(i8* arg)
-        LinkedList<llvm.Value> args = new LinkedList<>();
-        args.add(idValue);
-
-        llvm.CallInstruction free = new llvm.CallInstruction(this.state.funcs.get("free"), args);
-
-        this.func.getBlocks().getLast().getInstructions().add(free);
-
-        llvm.Block block = func.getBlocks().getLast();
-        return block;*/
-        return null;
+        return current;
     }
     
     public llvm.Block visit (InvocationStatement statement)
     {
-        // This is when a line just calls a function and does not assign a value
+        Block current = func.getBlocks().getLast();
 
-        //construct this in a similar manner to the llvm.CallInstruction but with no assignment at the end
+        this.expVisitor.hasTarget = false;
+        statement.getExpression().accept(this.expVisitor);
 
-        //leave this alone for now but will almost certainly be a problem
-        /*llvm.Value expVal = statement.getExpression().accept(this.expVisitor);
-
-        llvm.Block block = func.getBlocks().getLast();
-        return block;*/
-        return null;
+        return current;
     }
     
     public llvm.Block visit (PrintStatement statement)
     {
-        //call the printf function here just with print
-        /*llvm.Value expVal = statement.getExpression().accept(this.expVisitor);
+        Block current = func.getBlocks().getLast();
 
-        llvm.PrintInstruction print = new llvm.PrintInstruction(false, expVal);
-        this.func.getBlocks().getLast().getInstructions().add(print); 
+        Value expVal = statement.getExpression().accept(this.expVisitor);
+        expVal = expVisitor.loadID(expVal);
+        Instruction print = new PrintInstruction(false, expVal);
+        current.getInstructions().add(print);
 
-        llvm.Block block = func.getBlocks().getLast();
-        return block;*/
-        return null;
+        return current;
     }
     
     public llvm.Block visit (PrintLnStatement statement)
     {
-        //call the printf function here with println
-        /*llvm.Value expVal = statement.getExpression().accept(this.expVisitor);
+        Block current = func.getBlocks().getLast();
 
-        llvm.PrintInstruction println = new llvm.PrintInstruction(true, expVal);
-        this.func.getBlocks().getLast().getInstructions().add(println);
+        Value expVal = statement.getExpression().accept(this.expVisitor);
+        expVal = expVisitor.loadID(expVal);
+        Instruction print = new PrintInstruction(true, expVal);
+        current.getInstructions().add(print);
 
-        llvm.Block block = func.getBlocks().getLast();
-        return block;*/
-        return null;
+        return current;
     }
     
     public llvm.Block visit (ReturnEmptyStatement statement)
     {
-        //Graph Construction
-        //get predecessor
-        /*llvm.Block pred = func.getBlocks().getLast();
+        Block current = func.getBlocks().getLast();
+        current.addEdge(func.getExit());
 
-        //create pred -> exit
-        pred.addEdge(func.getExit());
+        Label retLabel = new Label(func.getExit().getLabel());
+        Instruction branch = new BranchInstruction(retLabel);
+        current.getInstructions().add(branch);
+        current.returns();
 
-        //this may create problems
-        //return cfg.getExit();
-
-        //using this unless the other is necessary
-        llvm.Instruction inst = new llvm.ReturnVoidInstruction();
-        func.getBlocks().getLast().getInstructions().add(inst);
-
-        return pred;*/
-        return null;
+        return current;
     }
     
     public llvm.Block visit (ReturnStatement statement)
     {
-        //Graph Construction
-        //get predecessor
-        /*llvm.Block pred = func.getBlocks().getLast();
+        Block current = func.getBlocks().getLast();
+        current.addEdge(func.getExit());
 
-        //create pred -> exit
-        pred.addEdge(func.getExit());
+        Value expVal = statement.getExpression().accept(this.expVisitor);
+        expVal = expVisitor.loadID(expVal);
 
-        //this may create problems
-        //return cfg.getExit();
+        //store expVal into retval
+        Pointer retValType = state.symbols.get("_retval_");
+        Identifier retVal = new Identifier(retValType, "_retval_", false);
+        Instruction store = new StoreInstruction(expVal.getType(), expVal, retValType, retVal);
+        current.getInstructions().add(store);
 
-        //using this unless the other is necessary
+        Label retLabel = new Label(func.getExit().getLabel());
+        Instruction branch = new BranchInstruction(retLabel);
+        current.getInstructions().add(branch);
+        current.returns();
 
-        //visit expression add return instruction with the value
-        llvm.Value value = statement.getExpression().accept(this.expVisitor);
-        llvm.Instruction inst = new llvm.ReturnInstruction(value.getType(), value);
-        this.func.getBlocks().getLast().getInstructions().add(inst);
-
-        return pred;*/
-        return null;
+        return current;
     }
     
     public llvm.Block visit (WhileStatement statement)
-    {
-        //Graph Construction
-        //get the predecessor 
-        /*llvm.Block pred = func.getBlocks().getLast();
+    {   
+        Block current = func.getBlocks().getLast();
 
-        //create the guard block
-        llvm.Block guard = new llvm.Block(blockLabel());
+        Value guard1 = statement.getGuard().accept(this.expVisitor);
+        guard1 = expVisitor.loadID(guard1);
 
-        //guard instructions
-        llvm.Value guardVal = statement.getGuard().accept(expVisitor);
-
-        //add edge pred -> guard
-        pred.addEdge(guard);
-
-        //add guard to list
-        func.getBlocks().add(guard);
-
-        //create the body block, guard -> body, body to list, bodyLast <- accept
-        llvm.Block body = new llvm.Block(blockLabel());
-        guard.addEdge(body);
+        Block body = new Block(blockLabel());
+        current.addEdge(body);
         func.getBlocks().add(body);
-        llvm.Block bodyLast = statement.getBody().accept(this);
+        Block bodyLast = statement.getBody().accept(this);
 
-        //add bodyLast -> guard
-        bodyLast.addEdge(guard);
-        
-        //add basic branch instruction to guard
-        llvm.Label gaurdLabel = new llvm.Label(guard.getLabel());
-        llvm.Instruction guardBranch = new llvm.BranchInstruction(gaurdLabel);
-        bodyLast.getInstructions().add(guardBranch);
+        //evaluate guard in the bodylast loop
+        Value guard2 = statement.getGuard().accept(this.expVisitor);
+        guard2 = expVisitor.loadID(guard2);
 
-        //create endloop, guard -> endloop, endloop to list
-        llvm.Block endloop = new llvm.Block(blockLabel());
-        guard.addEdge(endloop);
+        Block endloop = new Block(blockLabel());
+        current.addEdge(endloop);
+        bodyLast.addEdge(endloop);
         func.getBlocks().add(endloop);
 
-        //branch instruction and so on
-        llvm.Label endLabel = new llvm.Label(endloop.getLabel());
-        llvm.Label bodyLabel = new llvm.Label(body.getLabel());
-        llvm.Instruction loopBranch = new llvm.ConditionalBranchInstruction(guardVal, bodyLabel, endLabel);
-        guard.getInstructions().add(loopBranch);
+        Label bodyLabel = new Label(body.getLabel());
+        Label endLabel = new Label(endloop.getLabel());
 
-        //return endloop
-        return endloop;*/
-        return null;
+        //create the conditional branch for current
+        Instruction branch1 = new ConditionalBranchInstruction(guard1, bodyLabel, endLabel);
+        current.getInstructions().add(branch1);
+
+        //create the conditional branch for bodyLast
+        Instruction branch2 = new ConditionalBranchInstruction(guard2, bodyLabel, endLabel);
+        bodyLast.getInstructions().add(branch2);
+
+        return endloop;
     }
 }

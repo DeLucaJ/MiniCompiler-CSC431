@@ -1,5 +1,6 @@
 package llvm;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
 
@@ -7,14 +8,17 @@ public class State
 {
     public Hashtable<String, Pointer> global;
     public Hashtable<String, Pointer> symbols;
-    public Hashtable<String, Pointer> structs;
+    public Hashtable<String, Pointer> params;
+    public Hashtable<String, ArrayList<Identifier>> structs;
     public Hashtable<String, FunctionType> funcs;
+    public int registerIndex = 0;
 
     public State()
     {
         this.global = new Hashtable<String, Pointer>();
         this.symbols = new Hashtable<String, Pointer>();
-        this.structs = new Hashtable<String, Pointer>();
+        this.params = new Hashtable<String, Pointer>();
+        this.structs = new Hashtable<String, ArrayList<Identifier>>();
         this.funcs = new Hashtable<String, FunctionType>();
 
         //declare global functions here

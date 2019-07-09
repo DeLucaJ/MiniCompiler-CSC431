@@ -2,10 +2,10 @@ package llvm;
 
 public class BranchInstruction implements Instruction
 {
-    private final Value dest;
+    private final Label dest;
     private final String opcode;
 
-    public BranchInstruction(Value dest)
+    public BranchInstruction(Label dest)
     {
         this.opcode = "br";
         this.dest = dest;

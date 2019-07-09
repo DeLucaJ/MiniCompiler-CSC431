@@ -1,47 +1,54 @@
 package ast;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import semantics.*;
 import llvm.*;
 
-public class Program
-{
+public class Program {
    private final List<TypeDeclaration> types;
    private final List<Declaration> decls;
    private final List<Function> funcs;
 
-   public Program(List<TypeDeclaration> types, List<Declaration> decls,
-      List<Function> funcs)
-   {
+   public Program(List<TypeDeclaration> types, List<Declaration> decls, List<Function> funcs) {
       this.types = types;
       this.decls = decls;
       this.funcs = funcs;
    }
 
-   public boolean analyze()
-   {
-      //initialize state
+   public boolean analyze() {
+      // initialize state
       semantics.State state = new semantics.State();
 
-      //add types to state.structs
-      for (ast.TypeDeclaration type : this.types){ type.define(state); }
-
-      //add decls to global state
-      for (ast.Declaration decl : this.decls){ decl.defineSymbol(state); }
-
-      //add functions to global state? optional for filescope
-      for (ast.Function func : this.funcs){ func.define(state); }
-
-      //analyze all funcs
-      for (ast.Function func : this.funcs){ func.analyze(state); }
-
-      if (state.errors.size() == 0)
-      {
-         System.out.println("Semantics Passed");
-         return true;
+      // add types to state.structs
+      for (ast.TypeDeclaration type : this.types) {
+         type.define(state);
       }
-      else
-      {
+
+      // add decls to global state
+      for (ast.Declaration decl : this.decls) {
+         decl.defineSymbol(state);
+      }
+
+      // add functions to global state? optional for filescope
+      for (ast.Function func : this.funcs) {
+         func.define(state);
+      }
+
+      // analyze all funcs
+      for (ast.Function func : this.funcs) {
+         func.analyze(state);
+      }
+
+      if (state.errors.size() == 0) {
+         //System.out.println("Semantics Passed");
+         return true;
+      } else {
          return false;
       }
    }
@@ -57,8 +64,8 @@ public class Program
       //create llvm type decls for each type decl
       for (TypeDeclaration type : this.types)
       {
+         //filler pointer so structs can declare themselves
          llvm.TypeDeclaration newStruct = Utility.typeToLLVM(type, state);
-         state.structs.put(newStruct.getName(), newStruct.toType());
          llvmprog.getTypeDecls().add(newStruct);
       }
  
@@ -94,15 +101,15 @@ public class Program
          func.transform(newFunc, state);
       }
 
-      System.out.println("Control Flow Graph:--------------------");
+      //System.out.println("Control Flow Graph:--------------------");
 
       // display graphs
-      for (llvm.Function func : llvmprog.getFuncs())
+      /* for (llvm.Function func : llvmprog.getFuncs())
       {
          func.printGraph();
-      }
+      } */
 
-      System.out.println("LLVM Output:---------------------------");
+      //System.out.println("LLVM Output:---------------------------");
 
       System.out.println(llvmprog.llvm());
    }

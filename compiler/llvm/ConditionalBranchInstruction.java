@@ -20,9 +20,9 @@ public class ConditionalBranchInstruction implements Instruction
         return String.format(
             "%s i1 %s, label %s, label %s", 
             this.opcode,
-            this.condition,
-            this.iftrue,
-            this.iffalse
+            this.condition.llvm(),
+            this.iftrue.llvm(),
+            this.iffalse.llvm()
         );
     }
 }

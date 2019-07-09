@@ -123,10 +123,10 @@ public class Function
       {
          //might need to add a parameter prefix
          llvm.Pointer paramType = new llvm.Pointer(param.getType());
-         llvm.Identifier paramVal = new llvm.Identifier(paramType, param.getName(), false);
+         llvm.Identifier paramVal = new llvm.Identifier(paramType, "_P_" + param.getName(), false);
          AllocationInstruction paramAlloca = new AllocationInstruction(paramVal, paramType.getPointerType());
          func.getEntry().getInstructions().add(paramAlloca);
-         state.symbols.put(param.getName(), paramType);
+         state.params.put(param.getName(), paramType);
       }
       
       //alloca locals
@@ -141,6 +141,16 @@ public class Function
          state.symbols.put(local.getName(), localType);
       }
 
+      //store params into identifiers
+      for (llvm.Declaration param : func.getFuncType().getParams())
+      {
+         Pointer ppointer = state.params.get(param.getName());
+         Identifier pid = new Identifier(ppointer, "_P_" + param.getName(), false);
+         Identifier original = new Identifier(ppointer.getPointerType(), param.getName(), false);
+         Instruction store = new StoreInstruction(original.getType(), original, pid.getType(), pid);
+         func.getEntry().getInstructions().add(store);
+      }
+
       // run the control flow visitor on the body and get the last block that it creates
       llvm.Block last = this.body.accept(visitor);
 
@@ -152,7 +162,7 @@ public class Function
       }
       else
       {
-         llvm.Register retreg = new llvm.Register(func.getFuncType().getRetType(), "" + visitor.getExpVisitor().registerIndex++);
+         llvm.Register retreg = new llvm.Register(func.getFuncType().getRetType(), "u" + state.registerIndex++);
          llvm.LoadInstruction loadinst = new llvm.LoadInstruction(retreg, retVal, retValType);
          func.getExit().getInstructions().add(loadinst);
          retinst = new ReturnInstruction(func.getFuncType().getRetType(), retVal);

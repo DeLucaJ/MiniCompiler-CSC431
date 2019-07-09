@@ -6,7 +6,8 @@ public class Block implements Element
 {
     private String label;
     private LinkedList<Instruction> instructions;
-    private LinkedList<Edge> edges;   
+    private LinkedList<Edge> edges;
+    private boolean returns = false;  
 
     public Block(String label)
     {
@@ -38,9 +39,6 @@ public class Block implements Element
 
     public void printBlock()
     {
-        //print label
-        System.out.println( label + ":");
-
         //print edges
         for (Edge edge : edges)
         {
@@ -49,6 +47,10 @@ public class Block implements Element
             System.out.println("");
         }
     }
+
+    public boolean doesReturn() { return this.returns; }
+
+    public void returns() { this.returns = true; }
 
     public String llvm()
     {

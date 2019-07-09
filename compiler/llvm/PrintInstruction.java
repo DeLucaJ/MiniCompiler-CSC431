@@ -18,7 +18,7 @@ public class PrintInstruction implements Instruction
         if(endl)
         {
             return String.format(
-                "%s i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([5 x i8]* @.println, i32 0, i32 0), %s %s",
+                "%s i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([5 x i8]* @.println, i32 0, i32 0), %s %s)",
                 this.opcode,
                 this.arg.getType().llvm(),
                 this.arg.llvm()
@@ -27,7 +27,7 @@ public class PrintInstruction implements Instruction
         else
         {
             return String.format(
-                "%s i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([5 x i8]* @.print, i32 0, i32 0), %s %s",
+                "%s i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([5 x i8]* @.print, i32 0, i32 0), %s %s)",
                 this.opcode,
                 this.arg.getType().llvm(),
                 this.arg.llvm()

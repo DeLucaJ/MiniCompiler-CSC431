@@ -16,14 +16,14 @@ public class IntCompareInstruction implements Instruction
         this.op2 = op2;
         this.condition = condition;
         this.type = new Integer32();
-        this.opcode = "sub";
+        this.opcode = "icmp";
     }
 
     public String llvm()
     {
         return String.format(
             "%s = %s %s %s %s, %s", 
-            this.target, 
+            this.target.llvm(), 
             this.opcode,
             Utility.condToString(this.condition), 
             this.type.llvm(), 

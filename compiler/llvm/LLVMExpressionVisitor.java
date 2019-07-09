@@ -6,128 +6,200 @@ import java.util.*;
 
 public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
 {
-    private Function cfg;
+    private Function func;
     private llvm.State state;
-    public int registerIndex = 0;
+    public boolean hasTarget = true; //literally just for the invocation 
+    public Identifier readId; //always the last id found
 
-    public LLVMExpressionVisitor(Function cfg, llvm.State state)
+    public LLVMExpressionVisitor(Function func, llvm.State state)
     { 
-        this.cfg = cfg;
+        this.func = func;
         this.state = state;
     }
 
     public llvm.Value visit (BinaryExpression expression)
     {
-        /*llvm.Value op1 = expression.getLeft().accept(this);
-        llvm.Value op2 = expression.getLeft().accept(this);
-        llvm.Value target = new llvm.Register(op1.getType(), "" + this.registerIndex++);
+        Value op1 = expression.getLeft().accept(this);
+        op1 = loadID(op1);
+        Value op2 = expression.getRight().accept(this);
+        op2 = loadID(op2);
 
-        llvm.Instruction inst = null; // might cause a problem
+        Instruction inst;
+        Register target = new Register(new Integer32(), "u" + state.registerIndex++);
 
         switch (expression.getOperator())
         {
             case TIMES:
-                inst = new llvm.MulInstruction(target, op1, op2);
+                inst = new MulInstruction(target, op1, op2);
                 break;
             case DIVIDE:
-                inst = new llvm.SdivInstruction(target, op1, op2);
+                inst = new SdivInstruction(target, op1, op2);
                 break;
             case PLUS:
-                inst = new llvm.AddInstruction(target, op1, op2);
+                inst = new AddInstruction(target, op1, op2);
                 break;
             case MINUS:
-                inst = new llvm.SubInstruction(target, op1, op2);
+                inst = new SubInstruction(target, op1, op2);
                 break;
             case LT:
-                inst = new llvm.IntCompareInstruction(target, llvm.Cond.ULT, op1, op2);
+                inst = new IntCompareInstruction(target, Cond.SLT, op1, op2); 
                 break;
             case GT:
-                inst = new llvm.IntCompareInstruction(target, llvm.Cond.UGT, op1, op2);
+                inst = new IntCompareInstruction(target, Cond.SGT, op1, op2);
                 break;
             case LE:
-                inst = new llvm.IntCompareInstruction(target, llvm.Cond.ULE, op1, op2);
+                inst = new IntCompareInstruction(target, Cond.SLE, op1, op2);
                 break;
             case GE:
-                inst = new llvm.IntCompareInstruction(target, llvm.Cond.UGE, op1, op2);
+                inst = new IntCompareInstruction(target, Cond.SGE, op1, op2);
                 break;
             case EQ:
-                inst = new llvm.IntCompareInstruction(target, llvm.Cond.EQ, op1, op2);
+                //Must be a structure or an integer
+                //Shouldn't need to type check because of semantics
+                inst = new IntCompareInstruction(target, Cond.EQ, op1, op2);
                 break;
             case NE:
-                inst = new llvm.IntCompareInstruction(target, llvm.Cond.NE, op1, op2);
+                //Must be a structure or an integer
+                //Shouldn't need to type check because of semantics
+                inst = new IntCompareInstruction(target, Cond.NE, op1, op2);
                 break;
             case AND:
-                inst = new llvm.AndInstruction(target, op1, op2);
+                inst = new AndInstruction(target, op1, op2);
                 break;
-            case OR:
-                inst = new llvm.OrInstruction(target, op1, op2);
+            default: //OR
+                inst = new OrInstruction(target, op1, op2);
                 break;
         }
-        this.cfg.getBlocks().getLast().getInstructions().add(inst);
-        return target;*/
-        return null;
+
+        func.getBlocks().getLast().getInstructions().add(inst);
+        return target;
     }
 
     public llvm.Value visit (DotExpression expression)
     {
-        //There is some nonsense happening right now
-        /*llvm.Value leftVal = expression.getLeft().accept(this);
+        Value leftVal = expression.getLeft().accept(this);
+        leftVal = loadID(leftVal);
 
-        //leftVal might need to be a pointer to a structure
-        llvm.Pointer pointer = (llvm.Pointer) leftVal.getType();
+        //determine which value in the struct we are getting
+        //the left expression should always evaluate to an identifier
+        Pointer pointer = (Pointer) leftVal.getType();
 
-        llvm.Structure struct = (llvm.Structure) pointer.getPointerType();
+        Structure struct = (Structure) pointer.getPointerType();
+        ArrayList<Identifier> fields = state.structs.get(struct.getName());
+
+        Register target1 = null;
+        int index = 0;
+        Instruction getElement = null;
+        for (int i = 0; i < fields.size(); i++)
+        {
+            Identifier id = fields.get(i);
+            if (id.getName().equals(expression.getId()))
+            {
+                index = i;
+                target1 = new Register(id.getType(), "u" + state.registerIndex++); //just changed
+                getElement = new GetElementPtrInstruction(target1, pointer, leftVal, "" + index);
+            }
+        }
+
+        func.getBlocks().getLast().getInstructions().add(getElement);
         
-        return null; //not implemented right now*/
-        return null;
+        if(!expression.isSource())
+        {
+            Register target2 = new Register(target1.getType(), "u" + state.registerIndex++);
+
+            Instruction load = new LoadInstruction(target2, target1, target1.getType());
+
+            func.getBlocks().getLast().getInstructions().add(load);
+
+            return target2;
+        }
+
+        return target1;
     }
 
     public llvm.Value visit (FalseExpression expression)
     {
+        //might need to zextend false constant
         return new llvm.Immediate(new llvm.Integer32(), "0");
+    }
+
+    public Value loadID(Value value)
+    {
+        if (value instanceof Identifier)
+        {
+            Register target = new Register(((Pointer) value.getType()).getPointerType(), "u" + state.registerIndex++);
+
+            Instruction load = new LoadInstruction(target, value, value.getType());
+            func.getBlocks().getLast().getInstructions().add(load);
+
+            return target;
+        }
+        /* else if (value.getType() instanceof Pointer)
+        {
+            Pointer type = (Pointer) value.getType();
+            Register target = new Register(type.getPointerType(), "u" + state.registerIndex++);
+
+            Instruction load = new LoadInstruction(target, value, type);
+            func.getBlocks().getLast().getInstructions().add(load);
+
+            return target;
+        } */
+
+        return value;
     }
 
     public llvm.Value visit (IdentifierExpression expression)
     {
-        // checking for global might be rough
-        /*if(state.symbols.containsKey(expression.getId()))
+        Pointer pointer;
+        Identifier id;
+        if (state.symbols.containsKey(expression.getId()))
         {
-            return state.symbols.get(expression.getId());
+            pointer = state.symbols.get(expression.getId());
+            id = new Identifier(pointer, expression.getId(), false);
+        }
+        else if (state.params.containsKey(expression.getId()))
+        {
+            pointer = state.params.get(expression.getId());
+            id = new Identifier(pointer, "_P_" + expression.getId(), false);
+        }
+        else
+        {
+            pointer = state.global.get(expression.getId());
+            id = new Identifier(pointer, expression.getId(), true);
         }
 
-        if (state.global.containsKey(expression.getId()))
-        {
-            return state.global.get(expression.getId());
-        }
+        this.readId = id;
 
-        return null; //possible problem*/
-        return null;
+        return id;
     }
 
     public llvm.Value visit (InvocationExpression expression)
-    {
-        //figure out call stuff
+    {   
+        LinkedList<Value> args = new LinkedList<>();
+        boolean isStmt = !this.hasTarget;
+        this.hasTarget = true;
 
-        //find function type
-        /*llvm.FunctionType functionType = state.funcs.get(expression.getName());
-
-        //convert arguments
-        LinkedList<llvm.Value> args = new LinkedList<llvm.Value>();
         for (Expression argument : expression.getArguments())
         {
-            llvm.Value value = argument.accept(this);
-            args.add(value);
+            Value arg = argument.accept(this);
+            arg = loadID(arg);
+            args.add(arg);
         }
+        FunctionType function = state.funcs.get(expression.getName());
+        Register target = new Register(function.getRetType(), "u" + state.registerIndex++);
 
-        //create target
-        llvm.Value target = new llvm.Register(functionType.getRetType(), "" + this.registerIndex++);
+        Instruction call;
+        if(isStmt)
+        {
+            call = new CallInstruction(expression.getName(), function, args);
+        }
+        else
+        {
+            call = new CallInstruction(expression.getName(), target, function, args);
+        }
+        func.getBlocks().getLast().getInstructions().add(call);
 
-        //create instruction
-        llvm.Instruction inst = new llvm.CallInstruction(target, functionType, args);
-        this.cfg.getBlocks().getLast().getInstructions().add(inst);
-
-        return target;*/
-        return null;
+        return target;
     }
 
     public llvm.Value visit (IntegerExpression expression)
@@ -137,27 +209,23 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
 
     public llvm.Value visit (NewExpression expression)
     {
-        //create and push the call instruction
-        /*llvm.Structure struct = state.structs.get(expression.getId());
+        int numargs = state.structs.get(expression.getId()).size();
 
-        llvm.Value target1 = new llvm.Register(new llvm.Pointer(new llvm.Integer8()), "" + this.registerIndex++);
+        Pointer p = new Pointer(new Structure(expression.getId()));
+        Register target1 = new Register(p, "u" + state.registerIndex++);
+        FunctionType malloc = state.funcs.get("malloc");
+        LinkedList<Value> args = new LinkedList<>();
+        Immediate size = new Immediate(new Integer32(), "" + (4 * numargs));
+        args.add(size);
+        Instruction call = new CallInstruction("malloc", target1, malloc, args);
 
-        LinkedList<llvm.Value> args = new LinkedList<llvm.Value>();
-        args.add(new llvm.Immediate(new llvm.Integer32(), "" + (4 * struct.getProps().size())));
+        Register target2 = new Register(p, "u" + state.registerIndex++);
+        Instruction bitcast = new BitcastInstruction(target2, new Integer8(), target2, p);
 
-        llvm.CallInstruction call = new llvm.CallInstruction(target1, this.state.funcs.get("malloc"), args);
+        func.getBlocks().getLast().getInstructions().add(call);
+        func.getBlocks().getLast().getInstructions().add(bitcast);
 
-        this.cfg.getBlocks().getLast().getInstructions().add(call);
-
-        //create and push the bitcast
-        llvm.Value target2 = new llvm.Register(new llvm.Pointer(struct), "" + this.registerIndex++);
-
-        llvm.BitcastInstruction bitcast = new llvm.BitcastInstruction(target2, new llvm.Pointer(new llvm.Integer8()), target1, new llvm.Pointer(struct));
-
-        this.cfg.getBlocks().getLast().getInstructions().add(bitcast);
-
-        return target2;*/
-        return null;
+        return target2;
     }
 
     public llvm.Value visit (NullExpression expression)
@@ -179,25 +247,22 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
 
     public llvm.Value visit (UnaryExpression expression)
     {
-        /*llvm.Value operand = expression.getOperand().accept(this);
-        llvm.Value target = new llvm.Register(operand.getType(), "" + this.registerIndex++);
+        Value op1 = expression.getOperand().accept(this);
+        op1 = loadID(op1);
 
-        llvm.Instruction inst = null; //might cause a problem
-
+        Instruction inst;
+        Register target = new Register(op1.getType(), "u" + state.registerIndex++);
         switch (expression.getOperator())
         {
             case NOT:
-                //likely has an issue with booleans
-                inst = new llvm.XorInstruction(target, operand, new llvm.Immediate(new llvm.Integer32(), "4294967295"));
+                inst = new XorInstruction(target, op1, new Immediate(new Integer32(), "-1"));
                 break;
-            case MINUS:
-                //might have some issues with signed and unsigned
-                inst = new llvm.SubInstruction(target, new llvm.Immediate(new llvm.Integer32(), "0"), operand);
+            default: //MINUS
+                inst = new SubInstruction(target, new Immediate(new Integer32(), "0"), op1);
                 break;
         }
 
-        this.cfg.getBlocks().getLast().getInstructions().add(inst);
-        return target;*/
-        return null;
+        func.getBlocks().getLast().getInstructions().add(inst);
+        return target;
     }
 }
