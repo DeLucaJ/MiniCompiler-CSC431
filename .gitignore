@@ -22,6 +22,7 @@
 *.zip
 *.tar.gz
 *.rar
+*.out
 
 # Allowed Jar files
 !libraries/*
