@@ -9,7 +9,7 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
     private Function func;
     private llvm.State state;
     public boolean hasTarget = true; //literally just for the invocation 
-    public Identifier readId; //always the last id found
+    public Value readId; //always the last id found
 
     public LLVMExpressionVisitor(Function func, llvm.State state)
     { 
@@ -132,6 +132,11 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
             return target2;
         }
 
+        /* if (!expression.isSource())
+        {
+            this.readId = target1;
+        }
+ */
         return target1;
     }
 

@@ -55,26 +55,37 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
 
         if (source instanceof ReadValue)
         {
-             Instruction read = new ReadInstruction(this.expVisitor.readId);
-             block.getInstructions().add(read);
-             return block;
+            Instruction read;
+            if (lvalueExp instanceof IdentifierExpression)
+            {
+                read = new ReadInstruction(this.expVisitor.readId);
+            }
+            else
+            {
+                //System.out.println(lvalue.llvm());
+                read = new ReadInstruction(lvalue);
+            }
+            block.getInstructions().add(read);
+            return block;
         }
 
         //check for void type (null)
         source = expVisitor.reasignNull(source, ((Pointer) lvalue.getType()));
-        /* if (source.getType() instanceof Pointer)
+
+        //check for i1
+        Instruction store;
+        if (source.getType() instanceof Integer1)
         {
-            Pointer p = (Pointer) source.getType();
-            if (p.getPointerType() instanceof Void)
-            {
-                Type lpt = ((Pointer) lvalue.getType()).getPointerType();
-                source.setType(lpt);
-            }
-        } */
-
-        //create the store instruction
-        Instruction store = new StoreInstruction(source.getType(), source, lvalue.getType(), lvalue);
-
+            Register newSource = new Register(new Integer32(), "u" + state.registerIndex++);
+            Instruction zext = new ZextInstruction(newSource, source.getType(), source, newSource.getType());
+            block.getInstructions().add(zext);
+            store = new StoreInstruction(newSource.getType(), newSource, lvalue.getType(), lvalue);
+        }
+        else
+        {
+            //create the store instruction
+            store = new StoreInstruction(source.getType(), source, lvalue.getType(), lvalue);
+        }
         block.getInstructions().add(store);
 
         return block;
@@ -243,7 +254,19 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
             }
         } */
 
-        Instruction store = new StoreInstruction(expVal.getType(), expVal, retValType, retVal);
+        //check for i1
+        Instruction store;
+        if (expVal.getType() instanceof Integer1)
+        {
+            Register newSource = new Register(new Integer32(), "u" + state.registerIndex++);
+            Instruction zext = new ZextInstruction(newSource, expVal.getType(), expVal, newSource.getType());
+            current.getInstructions().add(zext);
+            store = new StoreInstruction(newSource.getType(), newSource, retValType, retVal);
+        }
+        else
+        {
+            store = new StoreInstruction(expVal.getType(), expVal, retValType, retVal);
+        }
         current.getInstructions().add(store);
 
         Label retLabel = new Label(func.getExit().getLabel());

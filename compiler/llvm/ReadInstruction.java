@@ -2,14 +2,14 @@ package llvm;
 
 public class ReadInstruction implements Instruction
 {
-    private Identifier identifier;
+    private Value identifier;
 
-    public ReadInstruction(Identifier identifier)
+    public ReadInstruction(Value identifier)
     {
         this.identifier = identifier;
     }
 
-    public Identifier getID()
+    public Value getID()
     {
         return this.identifier;
     }
