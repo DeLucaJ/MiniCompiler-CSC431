@@ -74,7 +74,10 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
 
         //check for i1
         Instruction store;
-        if (source.getType() instanceof Integer1)
+        if (
+            source.getType() instanceof Integer1 &&
+            !(((Pointer) lvalue.getType()).getPointerType() instanceof Integer1)
+        )
         {
             Register newSource = new Register(new Integer32(), "u" + state.registerIndex++);
             Instruction zext = new ZextInstruction(newSource, source.getType(), source, newSource.getType());
@@ -256,7 +259,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
 
         //check for i1
         Instruction store;
-        if (expVal.getType() instanceof Integer1)
+        if (expVal.getType() instanceof Integer1 && !(retValType.getPointerType() instanceof Integer1))
         {
             Register newSource = new Register(new Integer32(), "u" + state.registerIndex++);
             Instruction zext = new ZextInstruction(newSource, expVal.getType(), expVal, newSource.getType());
