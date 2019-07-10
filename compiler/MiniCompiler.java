@@ -51,7 +51,7 @@ public class MiniCompiler
          new File("./output").mkdir();
          String newFilename = "./output/" + args[0].replaceAll("\\./", "").replaceAll(".mini", ".ll").replaceAll("\\.\\./", "");
          
-         new File(newFilename.replaceAll(".ll", "").replaceAll("/\\w*$", "")).mkdirs();
+         new File(newFilename.replaceAll("\\.ll", "").replaceAll("/\\w*$", "")).mkdirs();
 
          File output = new File(newFilename);
          FileWriter fw = new FileWriter(output);
