@@ -25,15 +25,19 @@ public class Utility
 
     public static llvm.Type astToLLVM(ast.Type type, llvm.State state)
     {
-        if(type instanceof ast.VoidType)
+        if (type instanceof ast.VoidType)
         {
             return new llvm.Void();
         }
-        else if(type instanceof ast.BoolType || type instanceof ast.IntType)
+        else if (type instanceof ast.IntType)
         {
             return new llvm.Integer32();
         }
-        else if(type instanceof ast.StructType)
+        else if (type instanceof ast.BoolType)
+        {
+            return new llvm.Integer1();
+        }
+        else if (type instanceof ast.StructType)
         {   
             StructType stype = (ast.StructType) type;
             return new Pointer(new Structure(stype.getName()));
