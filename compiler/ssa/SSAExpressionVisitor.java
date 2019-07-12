@@ -261,7 +261,7 @@ public class SSAExpressionVisitor implements ExpressionVisitor<Value>
         func.getBlocks().getLast().getInstructions().add(read);
 
         //nead to load id into a register
-        Register readreg = new ssa.Register(func.getBlocks().getLast(), read_scratch.getType());
+        Register readreg = new ssa.Register(func.getBlocks().getLast(), ((Pointer)read_scratch.getType()).getPointerType());
         Instruction load = new LoadInstruction(readreg.toLLVM(), read_scratch, read_scratch.getType());
         func.getBlocks().getLast().getInstructions().add(load);
         readreg.setDefinition(load);
