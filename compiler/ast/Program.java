@@ -1,13 +1,6 @@
 package ast;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
-import semantics.*;
 import llvm.*;
 
 public class Program {
@@ -53,11 +46,12 @@ public class Program {
       }
    }
 
-   public llvm.Program transform()
+   public llvm.Program transform(boolean ssa)
    {
       //initialize llvm program
       llvm.Program llvmprog = new llvm.Program();
-      llvm.State state = new llvm.State();
+      llvm.State llvmstate = new llvm.State();
+      ssa.State ssastate = new ssa.State();
 
       //create the header?
 
@@ -65,17 +59,24 @@ public class Program {
       for (TypeDeclaration type : this.types)
       {
          //filler pointer so structs can declare themselves
-         llvm.TypeDeclaration newStruct = Utility.typeToLLVM(type, state);
+         llvm.TypeDeclaration newStruct = Utility.typeToLLVM(type, llvmstate);
          llvmprog.getTypeDecls().add(newStruct);
       }
  
       //create llvm decls for each decls
       for (ast.Declaration decl : this.decls)
       {
-         llvm.Declaration newGlobal = Utility.declToLLVM(decl, state);
-         state.global.put(newGlobal.getName(), new Pointer(newGlobal.getType()));
+         llvm.Declaration newGlobal = Utility.declToLLVM(decl, llvmstate);
+         llvmstate.global.put(newGlobal.getName(), new Pointer(newGlobal.getType()));
          llvmprog.getDecls().add(newGlobal);
       }
+
+      for(Declaration decl : this.decls)
+         {
+            llvm.Declaration global = llvm.Utility.declToLLVM(decl, llvmstate);
+            ssa.Ident gIdent = new ssa.Ident(null, global.getType(), global.getName(), true);
+            ssastate.globals.put(global.getName(), gIdent);
+         }
 
       for (Function func : this.funcs)
       { 
@@ -83,35 +84,32 @@ public class Program {
          LinkedList<llvm.Declaration> params = new LinkedList<llvm.Declaration>();
          for (Declaration param : func.getParams())
          {
-            params.add(llvm.Utility.declToLLVM(param, state));
+            params.add(llvm.Utility.declToLLVM(param, llvmstate));
          }
          llvm.FunctionType funcType = new llvm.FunctionType(
-            llvm.Utility.astToLLVM(func.getRetType(), state),
+            llvm.Utility.astToLLVM(func.getRetType(), llvmstate),
             params
          );
-         state.funcs.put(func.getName(), funcType);
+         llvmstate.funcs.put(func.getName(), funcType);
 
          //initialize the cfg
-         llvm.Function newFunc = new llvm.Function(
+         llvm.Function llvmFunc = new llvm.Function(
             func, 
             func.getName(),
             funcType
          );
-         llvmprog.getFuncs().add(newFunc);
-         func.transform(newFunc, state);
+         llvmprog.getFuncs().add(llvmFunc);
+         
+         if(ssa)
+         {
+            func.ssaTransform(llvmFunc, llvmstate, ssastate);
+         }
+         else
+         {
+            func.transform(llvmFunc, llvmstate);
+         }
       }
-
-      //System.out.println("Control Flow Graph:--------------------");
-
-      // display graphs
-      /* for (llvm.Function func : llvmprog.getFuncs())
-      {
-         func.printGraph();
-      } */
-
-      //System.out.println("LLVM Output:---------------------------");
-
-      //System.out.println(llvmprog.llvm());
+      
       return llvmprog;
    }
 }

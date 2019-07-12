@@ -2,7 +2,6 @@ package semantics;
 
 import ast.*;
 import visitor.*;
-import java.io.*;
 import java.util.*;
 
 public class SemanticExpressionVisitor implements ExpressionVisitor<Type>

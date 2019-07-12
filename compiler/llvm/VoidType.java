@@ -1,6 +1,6 @@
 package llvm;
 
-public class Void implements Type
+public class VoidType implements Type
 {
     public String llvm()
     {

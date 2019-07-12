@@ -30,7 +30,7 @@ public class State
         //free
         LinkedList<Declaration> f_params = new LinkedList<>();
         f_params.add(new Declaration("pointer", new Pointer(new Integer8())));
-        FunctionType free = new FunctionType(new Void(), f_params);
+        FunctionType free = new FunctionType(new VoidType(), f_params);
 
         //printf
         LinkedList<Declaration> p_params = new LinkedList<>();

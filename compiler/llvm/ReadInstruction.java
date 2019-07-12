@@ -26,4 +26,6 @@ public class ReadInstruction implements Instruction
             identifier.llvm()
         );
     }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue){}
 }

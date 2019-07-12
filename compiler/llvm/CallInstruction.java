@@ -65,4 +65,15 @@ public class CallInstruction implements Instruction
         }
         
     }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue)
+    {
+        for (Value arg : args)
+        {
+            if (arg.llvm().equals(oldvalue.toLLVM().llvm()))
+            {
+                args.set(args.indexOf(arg), newvalue.toLLVM());
+            }    
+        }
+    }
 }

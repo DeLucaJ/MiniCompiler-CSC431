@@ -27,7 +27,7 @@ public class Utility
     {
         if (type instanceof ast.VoidType)
         {
-            return new llvm.Void();
+            return new llvm.VoidType();
         }
         else if (type instanceof ast.IntType)
         {

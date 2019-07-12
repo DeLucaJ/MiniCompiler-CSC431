@@ -19,4 +19,6 @@ public class BranchInstruction implements Instruction
             this.dest.llvm()
         );
     }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue) {}
 }

@@ -2,7 +2,6 @@ package semantics;
 
 import ast.*;
 import visitor.*;
-import java.lang.*;
 import java.util.*;
 
 public class SemanticStatementVisitor implements StatementVisitor<Void>

@@ -4,8 +4,8 @@ public class GetElementPtrInstruction implements Instruction
 {
     private final String opcode;
     private final Value target;
-    private final Pointer pointerType;
-    private final Value pointerValue;
+    private Pointer pointerType;
+    private Value pointerValue;
     private final String index;
 
     public GetElementPtrInstruction(Value target, Pointer pointerType, Value pointerValue, String index)
@@ -27,5 +27,13 @@ public class GetElementPtrInstruction implements Instruction
             this.pointerValue.llvm(),
             this.index
         );
+    }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue)
+    {
+        if (pointerValue.llvm().equals(oldvalue.toLLVM().llvm()))
+        {
+           pointerValue = newvalue.toLLVM();
+        }
     }
 }

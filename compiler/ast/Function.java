@@ -3,6 +3,7 @@ package ast;
 import java.util.*;
 
 import semantics.*;
+import ssa.*;
 import llvm.*;
 
 public class Function
@@ -152,11 +153,11 @@ public class Function
       }
 
       // run the control flow visitor on the body and get the last block that it creates
-      llvm.Block last = this.body.accept(visitor);
+      this.body.accept(visitor);
 
       //add a return instruction at the end
       Instruction retinst;
-      if (func.getFuncType().getRetType() instanceof llvm.Void)
+      if (func.getFuncType().getRetType() instanceof llvm.VoidType)
       {
          retinst = new ReturnVoidInstruction();
       }
@@ -174,5 +175,67 @@ public class Function
       
       //this is here to make sure locals from other functions do not interfere
       state.symbols.clear();
+   }
+
+   public void ssaTransform(llvm.Function func, llvm.State llvmstate, ssa.State ssastate)
+   {
+      SSAStatementVisitor visitor = new SSAStatementVisitor(func, llvmstate, ssastate);
+
+      //put params in ssa as Idents with types
+      for (llvm.Declaration param : func.getFuncType().getParams())
+      {
+         Ident pIdent = new Ident(func.getEntry(), param.getType(), param.getName(), false);
+         ssastate.writeVariable(param.getName(), func.getEntry(), pIdent);
+         llvmstate.params.put(param.getName(), new Pointer(param.getType()));
+         ssastate.varNums.put(param.getName(), 0);
+      }
+
+      //how do I handle locals? Idents do not work for these... actually they might
+      for (Declaration local : this.locals)
+      {
+         llvm.Declaration localllvm = Utility.declToLLVM(local, llvmstate);
+         ssastate.varTypes.put(localllvm.getName(), localllvm.getType());
+         ssastate.varNums.put(localllvm.getName(), 0);
+      }
+
+      if (!(func.getFuncType().getRetType() instanceof llvm.VoidType))
+      {
+         ssastate.varTypes.put("_retval_", func.getFuncType().getRetType());
+         ssastate.varNums.put("_retval_", 0);
+      }
+
+      this.body.accept(visitor);
+      ssastate.sealBlock(func.getExit());
+
+      Instruction retinst;
+      if (func.getFuncType().getRetType() instanceof llvm.VoidType)
+      {
+         retinst = new ReturnVoidInstruction();
+      }
+      else
+      {
+         //This has a lot of problems almost certainly
+
+         //ssa.Value retval = ssastate.readVariable(func.getFuncType().getRetVariable(), func.getExit());
+         /* ssa.Register retreg = new ssa.Register(func.getExit(), func.getFuncType().getRetType());
+         PhiInstruction phi = new PhiInstruction(retreg, "_retval_");
+         phi.addPhiOperands("_retval_", ssastate);
+         func.getExit().getPhis().add(phi); */
+
+         ssa.Value retval = ssastate.readVariable("_retval_", func.getExit());
+
+         //might be wrong
+         retinst = new llvm.ReturnInstruction(func.getFuncType().getRetType(), retval.toLLVM());
+         if (retval instanceof ssa.Register) ((ssa.Register) retval).addUser(retinst);
+      }
+      func.getExit().getInstructions().add(retinst);
+
+      //add exit to the end of the linked list
+      func.close();
+
+      llvmstate.symbols.clear();
+      llvmstate.params.clear();
+      ssastate.currentDefs.clear();
+      ssastate.varTypes.clear();
    }
 }

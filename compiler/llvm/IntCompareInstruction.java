@@ -6,8 +6,8 @@ public class IntCompareInstruction implements Instruction
     private final String opcode;
     private final Cond condition; 
     private final Type type;
-    private final Value op1;
-    private final Value op2;
+    private Value op1;
+    private Value op2;
 
     public IntCompareInstruction(Value target, Cond condition, Value op1, Value op2)
     {
@@ -30,5 +30,17 @@ public class IntCompareInstruction implements Instruction
             this.op1.llvm(), 
             this.op2.llvm()
         );
+    }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue)
+    {
+        if (op1.llvm().equals(oldvalue.toLLVM().llvm()))
+        {
+            op1 = newvalue.toLLVM();
+        }
+        if (op2.llvm().equals(oldvalue.toLLVM().llvm()))
+        {
+            op2 = newvalue.toLLVM();
+        }
     }
 }

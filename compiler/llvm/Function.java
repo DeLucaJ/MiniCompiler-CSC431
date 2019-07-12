@@ -1,7 +1,6 @@
 package llvm; 
 
 import java.util.*;
-import ast.*;
 
 public class Function implements Element
 {
@@ -11,6 +10,7 @@ public class Function implements Element
     private LinkedList<Block> blocks;
     private llvm.FunctionType funcType;
     private final ast.Function function;
+    public int index = 0;
 
     public Function(ast.Function function, String label, llvm.FunctionType funcType)
     {
@@ -23,11 +23,16 @@ public class Function implements Element
         this.blocks.add(this.entry);
     }
 
+    public String blockLabel()
+    {
+        return this.label + this.index++;
+    }
+
     public void close()
     {
         if (this.blocks.getLast().getEdges().size() == 0)
         {
-            this.blocks.getLast().addEdge(this.exit);
+            this.blocks.getLast().addChild(this.exit);
             Instruction branch = new BranchInstruction(new Label(this.exit.getLabel()));
             this.blocks.getLast().getInstructions().add(branch);
         }

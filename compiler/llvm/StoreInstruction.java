@@ -4,9 +4,9 @@ public class StoreInstruction implements Instruction
 {
     public final String opcode;
     public final Type type;
-    public final Value value;
+    public Value value;
     public final Type pointerType;
-    public final Value pointerValue; 
+    public Value pointerValue; 
 
     public StoreInstruction(Type type, Value value, Type pointerType, Value pointerValue)
     {
@@ -27,5 +27,17 @@ public class StoreInstruction implements Instruction
             this.pointerType.llvm(),
             this.pointerValue.llvm()
         );
+    }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue)
+    {
+        if (pointerValue.llvm().equals(oldvalue.toLLVM().llvm()))
+        {
+            pointerValue = newvalue.toLLVM();
+        }
+        if (value.llvm().equals(oldvalue.toLLVM().llvm()))
+        {
+            value = newvalue.toLLVM();
+        }
     }
 }

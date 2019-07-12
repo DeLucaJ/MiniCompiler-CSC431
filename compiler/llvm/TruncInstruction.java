@@ -5,7 +5,7 @@ public class TruncInstruction implements Instruction
     private final Value target;
     private final String opcode;
     private final Type type1;
-    private final Value value;
+    private Value value;
     private final Type type2;
 
     public TruncInstruction(Value target, Type type1, Value value, Type type2)
@@ -27,5 +27,13 @@ public class TruncInstruction implements Instruction
             this.value.llvm(),
             this.type2.llvm()
         );
+    }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue)
+    {
+        if (value.llvm().equals(oldvalue.toLLVM().llvm()))
+        {
+            value = newvalue.toLLVM();
+        }
     }
 }

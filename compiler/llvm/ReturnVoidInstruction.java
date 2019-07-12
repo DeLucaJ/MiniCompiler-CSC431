@@ -6,4 +6,6 @@ public class ReturnVoidInstruction implements Instruction
     {
         return "ret void";
     }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue){}
 }

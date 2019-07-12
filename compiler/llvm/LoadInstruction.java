@@ -4,7 +4,7 @@ public class LoadInstruction implements Instruction
 {
     public final String opcode;
     public final Value target;
-    public final Value pointer;
+    public Value pointer;
     public final Type pointerType;
 
     public LoadInstruction(Value target, Value pointer, Type pointertype)
@@ -24,5 +24,13 @@ public class LoadInstruction implements Instruction
             this.pointerType.llvm(),
             this.pointer.llvm()
         );
+    }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue)
+    {
+        if (pointer.llvm().equals(oldvalue.toLLVM().llvm()))
+        {
+            pointer = newvalue.toLLVM();
+        }
     }
 }

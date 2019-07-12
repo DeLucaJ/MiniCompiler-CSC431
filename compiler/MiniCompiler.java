@@ -46,7 +46,7 @@ public class MiniCompiler
          
          // Milestone 2 & 3 - Control Flow
          //List<CFGraph> cfgs = new LinkedList<CFGraph>();
-         llvm.Program llvmprog = program.transform();
+         llvm.Program llvmprog = program.transform(ssa);
          
          new File("./output").mkdir();
          String newFilename = "./output/" + args[0].replaceAll("\\./", "").replaceAll(".mini", ".ll").replaceAll("\\.\\./", "");
@@ -61,12 +61,17 @@ public class MiniCompiler
    }
 
    private static String _inputFile = null;
+   private static boolean ssa = true;
 
    private static void parseParameters(String [] args)
    {
       for (int i = 0; i < args.length; i++)
       {
-         if (args[i].charAt(0) == '-')
+         if (args[i].equals("-stack"))
+         {
+            ssa = false;
+         }
+         else if (args[i].charAt(0) == '-')
          {
             System.err.println("unexpected option: " + args[i]);
             System.exit(1);

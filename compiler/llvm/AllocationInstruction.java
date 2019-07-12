@@ -22,4 +22,6 @@ public class AllocationInstruction implements Instruction
             this.type.llvm()
         );
     }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue) {}
 }

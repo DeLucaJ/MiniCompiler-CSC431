@@ -4,7 +4,7 @@ public class ReturnInstruction implements Instruction
 {
     private final String opcode;
     private final Type type;
-    private final Value value;
+    private Value value;
     
     public ReturnInstruction(Type type, Value value)
     {
@@ -21,5 +21,13 @@ public class ReturnInstruction implements Instruction
             this.type.llvm(),
             this.value.llvm()
         );
+    }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue)
+    {
+        if (value.llvm().equals(oldvalue.toLLVM().llvm()))
+        {
+            value = newvalue.toLLVM();
+        }
     }
 }

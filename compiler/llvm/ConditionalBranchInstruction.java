@@ -2,7 +2,7 @@ package llvm;
 
 public class ConditionalBranchInstruction implements Instruction
 {
-    private final Value condition;
+    private Value condition;
     private final Label iftrue;
     private final Label iffalse;
     private final String opcode;
@@ -24,5 +24,13 @@ public class ConditionalBranchInstruction implements Instruction
             this.iftrue.llvm(),
             this.iffalse.llvm()
         );
+    }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue)
+    {
+        if (condition.llvm().equals(oldvalue.toLLVM().llvm()))
+        {
+           condition = oldvalue.toLLVM();
+        }
     }
 }

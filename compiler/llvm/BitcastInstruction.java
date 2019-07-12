@@ -4,8 +4,8 @@ public class BitcastInstruction implements Instruction
 {
     private final Value target;
     private final String opcode;
-    private final Type type1;
-    private final Value value;
+    private Type type1;
+    private Value value;
     private final Type type2;
 
     public BitcastInstruction(Value target, Type type1, Value value, Type type2)
@@ -19,6 +19,7 @@ public class BitcastInstruction implements Instruction
 
     public String llvm()
     {
+        //System.out.println(this.type1 + " " + );
         return String.format(
             "%s = %s %s %s to %s", 
             this.target.llvm(),
@@ -27,5 +28,14 @@ public class BitcastInstruction implements Instruction
             this.value.llvm(),
             this.type2.llvm()
         );
+    }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue)
+    {
+        if (value.llvm().equals(oldvalue.toLLVM().llvm()))
+        {
+           value = oldvalue.toLLVM();
+           type1 = oldvalue.getType();
+        }
     }
 }

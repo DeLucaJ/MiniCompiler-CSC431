@@ -202,7 +202,7 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
         if (v.getType() instanceof Pointer)
         {
             Pointer vp = (Pointer) v.getType();
-            if (vp.getPointerType() instanceof Void)
+            if (vp.getPointerType() instanceof VoidType)
             {
                 Type lpt = p.getPointerType();
                 v.setType(lpt);
@@ -230,7 +230,7 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
                 if (arg.getType() instanceof Pointer)
                 {
                     Pointer argp = (Pointer) arg.getType();
-                    if (argp.getPointerType() instanceof Void)
+                    if (argp.getPointerType() instanceof VoidType)
                     {
                         Type lpt = (Pointer) function.getParams().get(index).getType();
                         arg.setType(lpt);
@@ -285,7 +285,7 @@ public class LLVMExpressionVisitor implements ExpressionVisitor<llvm.Value>
     public llvm.Value visit (NullExpression expression)
     {
         //the type should match the type being assigned too
-        return new llvm.Immediate(new llvm.Pointer(new llvm.Void()), "null");
+        return new llvm.Immediate(new llvm.Pointer(new llvm.VoidType()), "null");
     }
 
     public llvm.Value visit (ReadExpression expression)

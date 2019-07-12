@@ -4,7 +4,7 @@ public class PrintInstruction implements Instruction
 {
     private final String opcode;
     private final boolean endl;
-    private final Value arg;
+    private Value arg;
 
     public PrintInstruction(boolean endl, Value arg)
     {
@@ -32,6 +32,14 @@ public class PrintInstruction implements Instruction
                 this.arg.getType().llvm(),
                 this.arg.llvm()
             );
+        }
+    }
+
+    public void replaceValue(ssa.Value oldvalue, ssa.Value newvalue)
+    {
+        if (arg.llvm().equals(oldvalue.toLLVM().llvm()))
+        {
+            arg = newvalue.toLLVM();
         }
     }
 }

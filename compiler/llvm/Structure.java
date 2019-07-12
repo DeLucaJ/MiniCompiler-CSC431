@@ -1,7 +1,5 @@
 package llvm;
 
-import java.util.ArrayList;
-
 public class Structure implements Type
 {
     private final String name;

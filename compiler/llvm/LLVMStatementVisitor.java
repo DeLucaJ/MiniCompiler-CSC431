@@ -9,18 +9,12 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
     private llvm.Function func;
     private llvm.State state;
     private LLVMExpressionVisitor expVisitor;
-    private int index = 0;
 
     public LLVMStatementVisitor(llvm.Function cfg, llvm.State state)
     { 
         this.func = cfg;
         this.state = state;
         this.expVisitor = new LLVMExpressionVisitor(this.func, this.state); 
-    }
-
-    public String blockLabel()
-    {
-        return func.getLabel() + this.index++;
     }
 
     public LLVMExpressionVisitor getExpVisitor()
@@ -121,14 +115,14 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         guard = expVisitor.loadID(guard);
 
         //create the then block and accept then statement
-        Block thenBlock = new Block(blockLabel());
-        current.addEdge(thenBlock);
+        Block thenBlock = new Block(func.blockLabel());
+        current.addChild(thenBlock);
         func.getBlocks().add(thenBlock);
         Block thenLast = statement.getThen().accept(this);
 
         //create the else block and accept else statement
-        Block elseBlock = new Block(blockLabel());
-        current.addEdge(elseBlock);
+        Block elseBlock = new Block(func.blockLabel());
+        current.addChild(elseBlock);
         func.getBlocks().add(elseBlock);
         Block elseLast = statement.getElse().accept(this);
 
@@ -139,7 +133,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         current.getInstructions().add(branch);
 
         // create join block
-        Block joinBlock = new Block(blockLabel());
+        Block joinBlock = new Block(func.blockLabel());
         Label joinLabel = new Label(joinBlock.getLabel());
         //func.getBlocks().add(joinBlock);
 
@@ -147,14 +141,14 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         // if they return do not branch to join
         if (!thenLast.doesReturn())
         {
-            thenLast.addEdge(joinBlock);
+            thenLast.addChild(joinBlock);
             Instruction binst = new BranchInstruction(joinLabel);
             thenLast.getInstructions().add(binst);
         }
 
         if (!elseLast.doesReturn())
         {
-            elseLast.addEdge(joinBlock);
+            elseLast.addChild(joinBlock);
             Instruction binst = new BranchInstruction(joinLabel);
             elseLast.getInstructions().add(binst);
         }
@@ -223,7 +217,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
     public llvm.Block visit (ReturnEmptyStatement statement)
     {
         Block current = func.getBlocks().getLast();
-        current.addEdge(func.getExit());
+        current.addChild(func.getExit());
 
         Label retLabel = new Label(func.getExit().getLabel());
         Instruction branch = new BranchInstruction(retLabel);
@@ -236,7 +230,7 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
     public llvm.Block visit (ReturnStatement statement)
     {
         Block current = func.getBlocks().getLast();
-        current.addEdge(func.getExit());
+        current.addChild(func.getExit());
 
         Value expVal = statement.getExpression().accept(this.expVisitor);
         expVal = expVisitor.loadID(expVal);
@@ -287,8 +281,8 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         Value guard1 = statement.getGuard().accept(this.expVisitor);
         guard1 = expVisitor.loadID(guard1);
 
-        Block body = new Block(blockLabel());
-        current.addEdge(body);
+        Block body = new Block(func.blockLabel());
+        current.addChild(body);
         func.getBlocks().add(body);
         Block bodyLast = statement.getBody().accept(this);
 
@@ -296,9 +290,9 @@ public class LLVMStatementVisitor implements StatementVisitor<llvm.Block>
         Value guard2 = statement.getGuard().accept(this.expVisitor);
         guard2 = expVisitor.loadID(guard2);
 
-        Block endloop = new Block(blockLabel());
-        current.addEdge(endloop);
-        bodyLast.addEdge(endloop);
+        Block endloop = new Block(func.blockLabel());
+        current.addChild(endloop);
+        bodyLast.addChild(endloop);
         func.getBlocks().add(endloop);
 
         Label bodyLabel = new Label(body.getLabel());
