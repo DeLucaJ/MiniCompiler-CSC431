@@ -9,8 +9,7 @@ import java.io.*;
 import java.util.*;
 import javax.json.JsonValue;
 
-public class MiniCompiler
-{
+public class MiniCompiler {
    public static void main(String[] args) throws IOException
    {
       parseParameters(args);
@@ -47,8 +46,22 @@ public class MiniCompiler
          // Milestone 2 & 3 - Control Flow
          //List<CFGraph> cfgs = new LinkedList<CFGraph>();
          llvm.Program llvmprog = program.transform(ssa);
+
+         //String givenFile = args[0]; _inputFile exists
+         //new File("./output").mkdir(); //makes an output directory if none exists;
          
-         new File("./output").mkdir();
+         String pass1 = ssa ? _inputFile.replaceAll("\\.mini", "_ssa.ll") : _inputFile.replaceAll("\\.mini", "_stack.ll");
+         String pass2 = pass1.replaceAll("\\.\\./", "super/");
+         String pass3 = "./output/" + pass2.replaceAll("\\./", "");
+
+         new File(pass3.replaceAll("/\\w*\\.ll$", "")).mkdirs(); //create the directories
+         
+         File output = new File(pass3);
+         FileWriter fw = new FileWriter(output);
+         fw.write(llvmprog.llvm());
+         fw.close();
+
+         /* new File("./output").mkdir();
          String newFilename = "./output/" + args[0].replaceAll("\\./", "").replaceAll(".mini", ".ll").replaceAll("\\.\\./", "");
          
          new File(newFilename.replaceAll("\\.ll", "").replaceAll("/\\w*$", "")).mkdirs();
@@ -56,61 +69,44 @@ public class MiniCompiler
          File output = new File(newFilename);
          FileWriter fw = new FileWriter(output);
          fw.write(llvmprog.llvm());
-         fw.close();
+         fw.close(); */
       }
    }
 
    private static String _inputFile = null;
    private static boolean ssa = true;
 
-   private static void parseParameters(String [] args)
-   {
-      for (int i = 0; i < args.length; i++)
-      {
-         if (args[i].equals("-stack"))
-         {
+   private static void parseParameters(String[] args) {
+      for (int i = 0; i < args.length; i++) {
+         if (args[i].equals("-stack")) {
             ssa = false;
-         }
-         else if (args[i].charAt(0) == '-')
-         {
+         } else if (args[i].charAt(0) == '-') {
             System.err.println("unexpected option: " + args[i]);
             System.exit(1);
-         }
-         else if (_inputFile != null)
-         {
+         } else if (_inputFile != null) {
             System.err.println("too many files specified");
             System.exit(1);
-         }
-         else
-         {
+         } else {
             _inputFile = args[i];
          }
       }
    }
 
-   private static void error(String msg)
-   {
+   private static void error(String msg) {
       System.err.println(msg);
       System.exit(1);
    }
 
-   private static MiniLexer createLexer()
-   {
-      try
-      {
+   private static MiniLexer createLexer() {
+      try {
          CharStream input;
-         if (_inputFile == null)
-         {
+         if (_inputFile == null) {
             input = CharStreams.fromStream(System.in);
-         }
-         else
-         {
+         } else {
             input = CharStreams.fromFileName(_inputFile);
          }
          return new MiniLexer(input);
-      }
-      catch (java.io.IOException e)
-      {
+      } catch (java.io.IOException e) {
          System.err.println("file not found: " + _inputFile);
          System.exit(1);
          return null;

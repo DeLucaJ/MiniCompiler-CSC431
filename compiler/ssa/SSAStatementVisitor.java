@@ -27,9 +27,27 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
         return this.expVisitor;
     }
 
+    private Register checkForI1(Value source, Value lvalue, Block current)
+    {
+        Register newSource = null;
+        if (
+            source.getType() instanceof Integer1 &&
+            !(((Pointer) lvalue.getType()).getPointerType() instanceof Integer1)
+        )
+        {
+            newSource = new Register(current, new Integer32());
+            Instruction zext = new ZextInstruction(newSource.toLLVM(), source.getType(), source.toLLVM(), newSource.getType());
+            newSource.setDefinition(zext);
+            if (source instanceof Register) ((Register) source).addUser(zext);
+            current.getInstructions().add(zext);
+        }
+        return newSource;
+    }
+
     //Marked for proababl error
     public Block visit (AssignmentStatement statement)
     {   
+        // System.out.println(statement.getLineNum());
         Block current = func.getBlocks().getLast();
 
         Value source = statement.getSource().accept(this.expVisitor);
@@ -47,6 +65,17 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
                 //might need to tbe the pointertype...
                 llvm.Type newType = ssastate.varTypes.get(targetId.getId());
                 source.setType(newType);   
+            }
+
+            //check for global
+            if (ssastate.globals.contains(targetId.getId()))
+            {
+                //store instruction goes here
+                Value global = ssastate.globals.get(targetId.getId());
+                Instruction store = new StoreInstruction(source.getType(), source.toLLVM(), global.getType(), global.toLLVM());
+                current.getInstructions().add(store);
+
+                return current;
             }
 
             ssastate.writeVariable(targetId.getId(), current, source);
@@ -69,18 +98,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
         }
 
         //check for i1
-        Register source2 = null;
-        if (
-            source.getType() instanceof Integer1 &&
-            !(((Pointer) lvalue.getType()).getPointerType() instanceof Integer1)
-        )
-        {
-            source2 = new Register(current, new Integer32());
-            Instruction zext = new ZextInstruction(source2.toLLVM(), source.getType(), source.toLLVM(), source2.getType());
-            source2.setDefinition(zext);
-            if (source instanceof Register) ((Register) source).addUser(zext);
-            current.getInstructions().add(zext);
-        }
+        Register source2 = checkForI1(source, lvalue, current);
 
         Instruction store;
         if (source2 != null)
@@ -98,97 +116,11 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
         current.getInstructions().add(store);
 
         return current;
-        //OLD
-        /* System.out.println(statement.getLineNum() + ": Assignment");
-        Block current = func.getBlocks().getLast();
-
-        Expression lvalueExp;
-        String variable; 
-        if (statement.getTarget() instanceof LvalueId)
-        {
-            LvalueId targetId = (LvalueId) statement.getTarget();
-            variable = targetId.getId();
-            lvalueExp = new IdentifierExpression(statement.getLineNum(), targetId.getId());
-        }
-        else
-        {
-            LvalueDot targetDot = (LvalueDot) statement.getTarget();
-            variable = targetDot.getId();
-            lvalueExp = new DotExpression(statement.getLineNum(), targetDot.getLeft(), targetDot.getId(), true);
-        }
-        
-        Value lvalue = lvalueExp.accept(this.expVisitor);
-
-        Value source = statement.getSource().accept(this.expVisitor);
-        
-        //if (source instanceof ReadValue) return current;
-
-        //reassign null
-        if (source.getType() instanceof Pointer)
-        {
-            Pointer sourcep = (Pointer) source.getType();
-            if (sourcep.getPointerType() instanceof llvm.VoidType)
-            {
-                //please work with ssa
-                llvm.Type lpt = ((Pointer) lvalue.getType()).getPointerType();
-                source.setType(lpt);
-            }
-        }
-
-        //check for i1
-        Register source2 = null;
-        if (
-            source.getType() instanceof Integer1 &&
-            !(((Pointer) lvalue.getType()).getPointerType() instanceof Integer1)
-        )
-        {
-            source2 = new Register(current, new Integer32());
-            Instruction zext = new ZextInstruction(source2.toLLVM(), source.getType(), source.toLLVM(), source2.getType());
-            source2.setDefinition(zext);
-            if (source instanceof Register) ((Register) source).addUser(zext);
-            current.getInstructions().add(zext);
-        }
-
-        if (
-            lvalueExp instanceof DotExpression ||
-            (lvalue instanceof Ident && ((Ident) lvalue).isGlobal())
-        ) //identifiers should ignore this
-        {
-            Instruction store;
-            if (source2 != null)
-            {
-                store = new StoreInstruction(source2.getType(), source2.toLLVM(),lvalue.getType(), lvalue.toLLVM());
-                source2.addUser(store);
-            }
-            else
-            {
-                store = new StoreInstruction(source.getType(), source.toLLVM(), lvalue.getType(), lvalue.toLLVM());
-                if (source instanceof Register) ((Register) source).addUser(store);;
-
-            }
-            if (lvalue instanceof Register) ((Register) lvalue).setDefinition(store);
-            current.getInstructions().add(store);
-        }
-        else
-        {
-            if (source2 != null)
-            {
-                ssastate.writeVariable(variable, current, source2);
-            }
-            else
-            {
-                ssastate.writeVariable(variable, current, source);
-            }
-        }
-
-
-        //should probably be writing to a variable here
-
-        return current; */
     }
 
     public Block visit (BlockStatement statement)
     {
+        // System.out.println(statement.getLineNum());
         Block current = func.getBlocks().getLast();
 
         Block last = current;
@@ -202,6 +134,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (ConditionalStatement statement)
     {
+        // System.out.println(statement.getLineNum());
         Block current = func.getBlocks().getLast();
 
         //handle guard stuff here
@@ -256,11 +189,10 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (DeleteStatement statement)
     {
+        // System.out.println(statement.getLineNum());
         Block current = func.getBlocks().getLast();
 
         Value expval = statement.getExpression().accept(this.expVisitor);
-
-        //if (expval.getType() == null) System.out.println(statement.getLineNum());
 
         Register target = new Register(current, new Pointer(new Integer8()));
         Instruction bitcast = new BitcastInstruction(target.toLLVM(), expval.getType(), expval.toLLVM(), target.getType());
@@ -279,6 +211,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (InvocationStatement statement)
     {
+        // System.out.println(statement.getLineNum());
         Block current = func.getBlocks().getLast();
 
         this.expVisitor.hasTarget = false;
@@ -289,6 +222,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (PrintStatement statement)
     {
+        // System.out.println(statement.getLineNum());
         Block current = func.getBlocks().getLast();
 
         Value expval = statement.getExpression().accept(this.expVisitor);
@@ -301,6 +235,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (PrintLnStatement statement)
     {
+        // System.out.println(statement.getLineNum());
         Block current = func.getBlocks().getLast();
 
         Value expval = statement.getExpression().accept(this.expVisitor);
@@ -313,6 +248,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (ReturnEmptyStatement statement)
     {
+        // System.out.println(statement.getLineNum());
         Block current = func.getBlocks().getLast();
         current.addChild(func.getExit());
 
@@ -326,12 +262,12 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (ReturnStatement statement)
     {
+        // System.out.println(statement.getLineNum());
         Block current = func.getBlocks().getLast();
         current.addChild(func.getExit());
 
         Value expval = statement.getExpression().accept(this.expVisitor);
 
-        //Value retval = ssastate.readVariable("_retval_", current);
         ssastate.writeVariable("_retval_", current, expval);
 
         //create branch to return block
@@ -345,6 +281,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (WhileStatement statement)
     {
+        // System.out.println(statement.getLineNum());
         Block current = func.getBlocks().getLast();
 
         //evaluate guard stuff here

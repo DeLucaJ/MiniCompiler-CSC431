@@ -146,16 +146,14 @@ public class SSAExpressionVisitor implements ExpressionVisitor<Value>
 
     public Value visit (IdentifierExpression expression)
     {
+        if (ssastate.globals.contains(expression.getId()))
+        {
+            return ssastate.globals.get(expression.getId());
+        }
+
         Value value = ssastate.readVariable(expression.getId(), func.getBlocks().getLast());
 
         //if variable is not defined within the function
-        if (value instanceof Undef)
-        {
-            if (ssastate.globals.contains(expression.getId()))
-            {
-                return ssastate.globals.get(expression.getId());
-            }
-        }
         return value;
     }
 

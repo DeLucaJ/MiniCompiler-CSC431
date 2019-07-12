@@ -13,4 +13,9 @@ public class StructType
    }
 
    public String getName(){ return this.name; }
+
+   public int getLineNum()
+   {
+      return this.lineNum;
+   }
 }

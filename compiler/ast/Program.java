@@ -69,14 +69,12 @@ public class Program {
          llvm.Declaration newGlobal = Utility.declToLLVM(decl, llvmstate);
          llvmstate.global.put(newGlobal.getName(), new Pointer(newGlobal.getType()));
          llvmprog.getDecls().add(newGlobal);
-      }
 
-      for(Declaration decl : this.decls)
-         {
-            llvm.Declaration global = llvm.Utility.declToLLVM(decl, llvmstate);
-            ssa.Ident gIdent = new ssa.Ident(null, global.getType(), global.getName(), true);
-            ssastate.globals.put(global.getName(), gIdent);
-         }
+         ssa.Ident gIdent = new ssa.Ident(null, newGlobal.getType(), newGlobal.getName(), true);
+         ssastate.globals.put(newGlobal.getName(), gIdent);
+         ssastate.varNums.put(newGlobal.getName(), 0);
+         ssastate.varTypes.put(newGlobal.getName(), newGlobal.getType());
+      }
 
       for (Function func : this.funcs)
       { 

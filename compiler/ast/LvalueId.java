@@ -16,4 +16,9 @@ public class LvalueId
    {
       return this.id;
    }
+
+   public int getLineNum()
+   {
+      return this.lineNum;
+   }
 }

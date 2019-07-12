@@ -214,17 +214,7 @@ public class Function
       }
       else
       {
-         //This has a lot of problems almost certainly
-
-         //ssa.Value retval = ssastate.readVariable(func.getFuncType().getRetVariable(), func.getExit());
-         /* ssa.Register retreg = new ssa.Register(func.getExit(), func.getFuncType().getRetType());
-         PhiInstruction phi = new PhiInstruction(retreg, "_retval_");
-         phi.addPhiOperands("_retval_", ssastate);
-         func.getExit().getPhis().add(phi); */
-
          ssa.Value retval = ssastate.readVariable("_retval_", func.getExit());
-
-         //might be wrong
          retinst = new llvm.ReturnInstruction(func.getFuncType().getRetType(), retval.toLLVM());
          if (retval instanceof ssa.Register) ((ssa.Register) retval).addUser(retinst);
       }
@@ -235,7 +225,8 @@ public class Function
 
       llvmstate.symbols.clear();
       llvmstate.params.clear();
-      ssastate.currentDefs.clear();
+      /* ssastate.currentDefs.clear();
       ssastate.varTypes.clear();
+      ssastate.varNums.clear(); */
    }
 }

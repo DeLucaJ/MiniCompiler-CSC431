@@ -23,4 +23,9 @@ public class LvalueDot
    {
       return this.id;
    }
+
+   public int getLineNum()
+   {
+      return this.lineNum;
+   }
 }

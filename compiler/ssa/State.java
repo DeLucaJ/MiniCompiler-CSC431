@@ -67,7 +67,7 @@ public class State
 
     private Value readVariableRecursive(String variable, Block block)
     {
-       /*  System.out.println(
+        /* System.out.println(
             String.format(
                 "Reading %s recursively in block %s",
                 variable,
@@ -88,7 +88,8 @@ public class State
         else if (block.getParents().size() == 0)
         {
             //should probably check params and globals
-            val = new Undef(block, varTypes.get(variable));
+            //val = new Undef(block, varTypes.get(variable));
+            val = this.globals.get(variable);
         }
         else if (block.getParents().size() == 1)
         {
