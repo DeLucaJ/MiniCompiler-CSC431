@@ -61,7 +61,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     //Marked for proababl error
     public Block visit (AssignmentStatement statement)
     {   
-        // System.out.println(statement.getLineNum());
+        // System.out.println(statement.getLineNum() + " Assignment");
         Block current = func.getBlocks().getLast();
 
         Value source = statement.getSource().accept(this.expVisitor);
@@ -70,19 +70,23 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
         {
             LvalueId targetId = (LvalueId) statement.getTarget();
 
-            //reassign null
-            reassignNull(source, ssastate.varTypes.get(targetId.getId()));
-
             //check for global
-            if (ssastate.globals.contains(targetId.getId()))
+            // System.out.println(targetId.getId() + " in globals?: " + ssastate.globals.containsKey(targetId.getId()));
+            if (ssastate.globals.containsKey(targetId.getId()))
             {
                 //store instruction goes here
                 Value global = ssastate.globals.get(targetId.getId());
+
+                reassignNull(source, global.getType());
+
                 Instruction store = new StoreInstruction(source.getType(), source.toLLVM(), global.getType(), global.toLLVM());
                 current.getInstructions().add(store);
+                if (source instanceof Register) ((Register) source).addUser(store);
 
                 return current;
             }
+            reassignNull(source, ssastate.varTypes.get(targetId.getId()));
+            // System.out.println("\tAfter Reassign " + source.getType());
 
             ssastate.writeVariable(targetId.getId(), current, source);
             return current;
@@ -119,7 +123,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
 
     public Block visit (BlockStatement statement)
     {
-        // System.out.println(statement.getLineNum());
+        // System.out.println(statement.getLineNum() + " Block");
         Block current = func.getBlocks().getLast();
 
         Block last = current;
@@ -133,7 +137,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (ConditionalStatement statement)
     {
-        // System.out.println(statement.getLineNum());
+        // System.out.println(statement.getLineNum() + " Conditional");
         Block current = func.getBlocks().getLast();
 
         //handle guard stuff here
@@ -188,7 +192,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (DeleteStatement statement)
     {
-        // System.out.println(statement.getLineNum());
+        // System.out.println(statement.getLineNum() + " Delete");
         Block current = func.getBlocks().getLast();
 
         Value expval = statement.getExpression().accept(this.expVisitor);
@@ -210,7 +214,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (InvocationStatement statement)
     {
-        // System.out.println(statement.getLineNum());
+        // System.out.println(statement.getLineNum() + " Invocation");
         Block current = func.getBlocks().getLast();
 
         this.expVisitor.hasTarget = false;
@@ -221,7 +225,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (PrintStatement statement)
     {
-        // System.out.println(statement.getLineNum());
+        // System.out.println(statement.getLineNum() + " Print");
         Block current = func.getBlocks().getLast();
 
         Value expval = statement.getExpression().accept(this.expVisitor);
@@ -234,7 +238,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (PrintLnStatement statement)
     {
-        // System.out.println(statement.getLineNum());
+        // System.out.println(statement.getLineNum() + " Println");
         Block current = func.getBlocks().getLast();
 
         Value expval = statement.getExpression().accept(this.expVisitor);
@@ -247,7 +251,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (ReturnEmptyStatement statement)
     {
-        // System.out.println(statement.getLineNum());
+        // System.out.println(statement.getLineNum() + " RetrunEmpty");
         Block current = func.getBlocks().getLast();
         current.addChild(func.getExit());
 
@@ -261,7 +265,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (ReturnStatement statement)
     {
-        // System.out.println(statement.getLineNum());
+        // System.out.println(statement.getLineNum() + " Retrun");
         Block current = func.getBlocks().getLast();
         current.addChild(func.getExit());
 
@@ -283,7 +287,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
     
     public Block visit (WhileStatement statement)
     {
-        // System.out.println(statement.getLineNum());
+        // System.out.println(statement.getLineNum() + " While");
         Block current = func.getBlocks().getLast();
 
         //evaluate guard stuff here

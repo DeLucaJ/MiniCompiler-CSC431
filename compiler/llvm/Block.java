@@ -92,11 +92,11 @@ public class Block implements Element
     {
         String blockstring = this.label + ":\n";
 
-        //System.out.println(String.format("%s: %d phis", this.label, phis.size()));
+        // System.out.println(String.format("%s: %d phis", this.label, phis.size()));
 
         for (PhiInstruction phi : phis)
         {
-
+            // System.out.println(phis.indexOf(phi));
             blockstring += String.format("\t%s\n", phi.llvm());
         }
 

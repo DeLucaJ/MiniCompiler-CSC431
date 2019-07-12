@@ -9,6 +9,7 @@ public class State
     public Hashtable<String, Type> varTypes;
     public Hashtable<String, Integer> varNums;
     public Hashtable<String, Ident> globals;
+    //public Block global;
 
     public State()
     {
@@ -32,7 +33,7 @@ public class State
                 variable,
                 block.getLabel(),
                 value.toLLVM().llvm(),
-                value.getType()
+                value.getType().llvm()
             )
         ); */
     }
@@ -57,7 +58,7 @@ public class State
                     "%s read as %s of type %s",
                     variable, 
                     currentDefs.get(variable).get(block).toLLVM().llvm(),
-                    currentDefs.get(variable).get(block).getType()
+                    currentDefs.get(variable).get(block).getType().llvm()
                 )
             ); */
             return currentDefs.get(variable).get(block);
@@ -77,6 +78,7 @@ public class State
         Value val;
         if (!block.isSealed())
         {
+            // System.out.println("! " + block.getLabel() + " is not sealed");
             Register phireg = new Register(block, varTypes.get(variable), variable, varNums.get(variable));
             varNums.put(variable, varNums.get(variable) + 1);
             PhiInstruction phi = new PhiInstruction(phireg, variable);
@@ -87,9 +89,26 @@ public class State
         }
         else if (block.getParents().size() == 0)
         {
-            //should probably check params and globals
-            //val = new Undef(block, varTypes.get(variable));
-            val = this.globals.get(variable);
+            //variable is likely undefined
+            //val = this.globals.get(variable);
+            /* if (currentDefs.get(variable).contains(global))
+            {
+                val = currentDefs.get(variable).get(global);
+            }
+            else
+            {
+                val = new Undef(block, varTypes.get(variable));
+            } */
+            /* System.out.println(
+                String.format(
+                    "Undefined Variable hit %s in block %s",
+                    variable,
+                    block.getLabel()
+                )
+            ); */
+            // val = new Undef(block, varTypes.get(variable));
+            val = globals.get(variable);
+            return val;
         }
         else if (block.getParents().size() == 1)
         {
@@ -114,7 +133,7 @@ public class State
                 "%s read as %s of type %s",
                 variable, 
                 currentDefs.get(variable).get(block).toLLVM().llvm(),
-                currentDefs.get(variable).get(block).getType()
+                currentDefs.get(variable).get(block).getType().llvm()
             )
         ); */
         return val;

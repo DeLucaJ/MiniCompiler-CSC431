@@ -47,7 +47,7 @@ public class PhiInstruction implements Instruction
 
         for (ssa.Value operand : this.operands)
         {
-            //System.out.println(operand.toLLVM());
+            // System.out.println(operand.toLLVM() + ": " + operand.toLLVM().llvm());
             phistring += String.format("[%s, %s]", operand.toLLVM().llvm(), "%" + operand.getBlock().getLabel());
             if(!(operand.equals(this.operands.getLast())))
             {
@@ -102,7 +102,6 @@ public class PhiInstruction implements Instruction
         return same;
     }
 
-    //Not finished
     public void replaceBy(Value value)
     {
        for (Instruction user : target.getUsers())

@@ -70,10 +70,10 @@ public class Program {
          llvmstate.global.put(newGlobal.getName(), new Pointer(newGlobal.getType()));
          llvmprog.getDecls().add(newGlobal);
 
-         ssa.Ident gIdent = new ssa.Ident(null, newGlobal.getType(), newGlobal.getName(), true);
+         ssa.Ident gIdent = new ssa.Ident(null, new Pointer(newGlobal.getType()), newGlobal.getName(), true);
+         //System.out.println(newGlobal.getName());
          ssastate.globals.put(newGlobal.getName(), gIdent);
-         ssastate.varNums.put(newGlobal.getName(), 0);
-         ssastate.varTypes.put(newGlobal.getName(), newGlobal.getType());
+         //System.out.println(ssastate.globals.containsKey(newGlobal.getName()));
       }
 
       for (Function func : this.funcs)

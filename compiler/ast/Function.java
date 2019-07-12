@@ -204,6 +204,8 @@ public class Function
          ssastate.varNums.put("_retval_", 0);
       }
 
+      //ssastate.global.addChild(func.getEntry());
+      ssastate.sealBlock(func.getEntry());
       this.body.accept(visitor);
       ssastate.sealBlock(func.getExit());
 
@@ -225,8 +227,8 @@ public class Function
 
       llvmstate.symbols.clear();
       llvmstate.params.clear();
-      /* ssastate.currentDefs.clear();
+      ssastate.currentDefs.clear();
       ssastate.varTypes.clear();
-      ssastate.varNums.clear(); */
+      ssastate.varNums.clear();
    }
 }

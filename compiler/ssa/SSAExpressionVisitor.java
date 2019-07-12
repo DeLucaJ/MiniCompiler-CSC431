@@ -146,12 +146,29 @@ public class SSAExpressionVisitor implements ExpressionVisitor<Value>
 
     public Value visit (IdentifierExpression expression)
     {
-        if (ssastate.globals.contains(expression.getId()))
+        Block current = func.getBlocks().getLast();
+        /* if (ssastate.globals.contains(expression.getId()))
         {
             return ssastate.globals.get(expression.getId());
-        }
+        } */
+        // System.out.println("IDEX: " + expression.getId() + " in globals? " + ssastate.globals.containsKey(expression.getId()));
 
-        Value value = ssastate.readVariable(expression.getId(), func.getBlocks().getLast());
+        if (ssastate.globals.containsKey(expression.getId()))
+        {
+            // System.out.println("Global Variable " + expression.getId());
+            //load the variable into a register and write the variable in the current block as a this
+            //globals should always be pointers
+            Value global = ssastate.globals.get(expression.getId());
+            Register loadreg = new Register(current, ((Pointer) global.getType()).getPointerType());
+            Instruction load = new LoadInstruction(loadreg.toLLVM(), global.toLLVM(), global.getType());
+            current.getInstructions().add(load);
+            loadreg.setDefinition(load);
+            
+            return loadreg;
+        }
+        Value value = ssastate.readVariable(expression.getId(), current);
+
+        SSAStatementVisitor.reassignNull(value, ssastate.varTypes.get(expression.getId()));
 
         //if variable is not defined within the function
         return value;
