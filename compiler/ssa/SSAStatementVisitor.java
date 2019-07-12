@@ -77,7 +77,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
                 //store instruction goes here
                 Value global = ssastate.globals.get(targetId.getId());
 
-                reassignNull(source, global.getType());
+                reassignNull(source, ((Pointer) global.getType()).getPointerType());
 
                 Instruction store = new StoreInstruction(source.getType(), source.toLLVM(), global.getType(), global.toLLVM());
                 current.getInstructions().add(store);
