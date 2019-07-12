@@ -70,9 +70,11 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
         {
             LvalueId targetId = (LvalueId) statement.getTarget();
 
-            //check for global
-            // System.out.println(targetId.getId() + " in globals?: " + ssastate.globals.containsKey(targetId.getId()));
-            if (ssastate.globals.containsKey(targetId.getId()))
+            //does local overwrite???
+            if (
+                !ssastate.varTypes.containsKey(targetId.getId()) &&
+                ssastate.globals.containsKey(targetId.getId())
+            )
             {
                 //store instruction goes here
                 Value global = ssastate.globals.get(targetId.getId());
