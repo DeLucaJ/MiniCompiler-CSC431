@@ -175,15 +175,7 @@ public class SSAExpressionVisitor implements ExpressionVisitor<Value>
             int index = args.size();
             if (function.getParams().get(index).getType() instanceof Pointer)
             {
-                if (arg.getType() instanceof Pointer)
-                {
-                    Pointer argp = (Pointer) arg.getType();
-                    if (argp.getPointerType() instanceof ast.VoidType)
-                    {
-                        llvm.Type lpt = (Pointer) function.getParams().get(index).getType();
-                        arg.setType(lpt);
-                    }
-                }
+                SSAStatementVisitor.reassignNull(arg, (Pointer) function.getParams().get(index).getType());
             }
             args.add(arg.toLLVM());
             argssa.add(arg);

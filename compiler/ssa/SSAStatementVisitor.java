@@ -44,6 +44,20 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
         return newSource;
     }
 
+    public static void reassignNull(Value value, llvm.Type type)
+    {
+        //reassign null
+        if (
+            value.getType() instanceof Pointer && 
+            ((Pointer) value.getType()).getPointerType() instanceof llvm.VoidType
+        )
+        {
+            //might need to tbe the pointertype...
+            llvm.Type newType = type;
+            value.setType(newType);   
+        }
+    }
+
     //Marked for proababl error
     public Block visit (AssignmentStatement statement)
     {   
@@ -57,15 +71,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
             LvalueId targetId = (LvalueId) statement.getTarget();
 
             //reassign null
-            if (
-                source.getType() instanceof Pointer && 
-                ((Pointer) source.getType()).getPointerType() instanceof llvm.VoidType
-            )
-            {
-                //might need to tbe the pointertype...
-                llvm.Type newType = ssastate.varTypes.get(targetId.getId());
-                source.setType(newType);   
-            }
+            reassignNull(source, ssastate.varTypes.get(targetId.getId()));
 
             //check for global
             if (ssastate.globals.contains(targetId.getId()))
@@ -88,14 +94,7 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
         Value lvalue = lvalueExp.accept(this.expVisitor);
 
         //reassign null
-        if (
-            source.getType() instanceof Pointer && 
-            ((Pointer) source.getType()).getPointerType() instanceof llvm.VoidType
-        )
-        {
-            llvm.Type lpt = ((Pointer) lvalue.getType()).getPointerType();
-            source.setType(lpt);
-        }
+        reassignNull(source, ((Pointer) lvalue.getType()).getPointerType());
 
         //check for i1
         Register source2 = checkForI1(source, lvalue, current);
@@ -267,6 +266,9 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
         current.addChild(func.getExit());
 
         Value expval = statement.getExpression().accept(this.expVisitor);
+
+        //check for null should go here
+        reassignNull(expval, ssastate.varTypes.get("_retval_"));
 
         ssastate.writeVariable("_retval_", current, expval);
 
