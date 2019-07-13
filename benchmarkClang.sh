@@ -3,7 +3,7 @@ script='clang -m32'
 function compile {
     file=$1
     echo $file
-    exec clang -m32 -o ${file%%.ll}".out" $1
+    exec clang -m32 -o ${file%.ll}".out" $1
 }
 
 export -f compile
