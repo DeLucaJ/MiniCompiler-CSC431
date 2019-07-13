@@ -43,12 +43,8 @@ public class MiniCompiler {
          boolean passed = program.analyze();
          if (!passed) return;
          
-         // Milestone 2 & 3 - Control Flow
-         //List<CFGraph> cfgs = new LinkedList<CFGraph>();
+         // Milestone 2 & 3 - Control Flow and LLVM
          llvm.Program llvmprog = program.transform(ssa);
-
-         //String givenFile = args[0]; _inputFile exists
-         //new File("./output").mkdir(); //makes an output directory if none exists;
          
          String pass1 = ssa ? _inputFile.replaceAll("\\.mini", "_ssa.ll") : _inputFile.replaceAll("\\.mini", "_stack.ll");
          String pass2 = pass1.replaceAll("\\.\\./", "super/");
@@ -60,18 +56,6 @@ public class MiniCompiler {
          FileWriter fw = new FileWriter(output);
          fw.write(llvmprog.llvm());
          fw.close();
-
-         //System.out.println("Instruciton Count: " + llvmprog.instructionCount());
-
-         /* new File("./output").mkdir();
-         String newFilename = "./output/" + args[0].replaceAll("\\./", "").replaceAll(".mini", ".ll").replaceAll("\\.\\./", "");
-         
-         new File(newFilename.replaceAll("\\.ll", "").replaceAll("/\\w*$", "")).mkdirs();
-
-         File output = new File(newFilename);
-         FileWriter fw = new FileWriter(output);
-         fw.write(llvmprog.llvm());
-         fw.close(); */
       }
    }
 
