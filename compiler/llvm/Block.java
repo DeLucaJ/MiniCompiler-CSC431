@@ -91,7 +91,7 @@ public class Block implements Element
     public String llvm()
     {
         String blockstring = this.label + ":\n";
-
+        //String blockstring = this.printLabel ? this.label + ":\n" : "";
         // System.out.println(String.format("%s: %d phis", this.label, phis.size()));
 
         for (PhiInstruction phi : phis)

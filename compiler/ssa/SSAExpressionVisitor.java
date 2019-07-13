@@ -147,11 +147,6 @@ public class SSAExpressionVisitor implements ExpressionVisitor<Value>
     public Value visit (IdentifierExpression expression)
     {
         Block current = func.getBlocks().getLast();
-        /* if (ssastate.globals.contains(expression.getId()))
-        {
-            return ssastate.globals.get(expression.getId());
-        } */
-        // System.out.println("IDEX: " + expression.getId() + " in globals? " + ssastate.globals.containsKey(expression.getId()));
 
         if (
                 !ssastate.varTypes.containsKey(expression.getId()) &&

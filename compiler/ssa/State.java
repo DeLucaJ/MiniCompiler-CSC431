@@ -24,9 +24,9 @@ public class State
         if (!currentDefs.containsKey(variable))
         {
             currentDefs.put(variable, new Hashtable<>());
+            varTypes.put(variable, value.getType());
         }
         currentDefs.get(variable).put(block, value);
-        varTypes.put(variable, value.getType());
         /* System.out.println(
             String.format(
                 "$ %s written to %s with value %s of type %s",
@@ -84,29 +84,12 @@ public class State
             PhiInstruction phi = new PhiInstruction(phireg, variable);
             phireg.setDefinition(phi);
             val = phireg;
+
             block.getIncomplete().add(phi);
             block.getPhis().add(phi);
         }
         else if (block.getParents().size() == 0)
         {
-            //variable is likely undefined
-            //val = this.globals.get(variable);
-            /* if (currentDefs.get(variable).contains(global))
-            {
-                val = currentDefs.get(variable).get(global);
-            }
-            else
-            {
-                val = new Undef(block, varTypes.get(variable));
-            } */
-            /* System.out.println(
-                String.format(
-                    "Undefined Variable hit %s in block %s",
-                    variable,
-                    block.getLabel()
-                )
-            ); */
-            // val = new Undef(block, varTypes.get(variable));
             val = globals.get(variable);
             return val;
         }
@@ -125,6 +108,7 @@ public class State
             
             writeVariable(variable, block, val);
             
+            //val = phi.addPhiOperands(variable, this);\
             val = phi.addPhiOperands(variable, this);
         }
         writeVariable(variable, block, val);
