@@ -1,9 +1,9 @@
-script='clang -m32'
+script='clang -m32 -o'
 
 function compile {
     file=$1
     echo $file
-    $script -o ${file%%.ll}".out" $1
+    $script ${file%%.ll}".out" $1
 }
 
 export -f compile
