@@ -153,7 +153,10 @@ public class SSAExpressionVisitor implements ExpressionVisitor<Value>
         } */
         // System.out.println("IDEX: " + expression.getId() + " in globals? " + ssastate.globals.containsKey(expression.getId()));
 
-        if (ssastate.globals.containsKey(expression.getId()))
+        if (
+                !ssastate.varTypes.containsKey(expression.getId()) &&
+                ssastate.globals.containsKey(expression.getId())
+        )
         {
             // System.out.println("Global Variable " + expression.getId());
             //load the variable into a register and write the variable in the current block as a this
