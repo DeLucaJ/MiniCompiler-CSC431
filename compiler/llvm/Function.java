@@ -30,6 +30,14 @@ public class Function implements Element
 
     public void close()
     {
+        for (Block block : this.blocks)
+        {
+            if (block.getParents().size() == 0 && !block.equals(this.entry))
+            {
+                this.blocks.remove(block);
+            }
+        }
+
         if (this.blocks.getLast().getEdges().size() == 0)
         {
             this.blocks.getLast().addChild(this.exit);

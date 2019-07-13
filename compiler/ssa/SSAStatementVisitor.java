@@ -187,6 +187,10 @@ public class SSAStatementVisitor implements StatementVisitor<Block>
         {
             func.getBlocks().add(joinBlock);
         }
+        else 
+        {
+            joinBlock.returns();
+        }
 
         ssastate.sealBlock(joinBlock);
         return joinBlock;
