@@ -2,6 +2,8 @@ package llvm;
 
 import java.util.LinkedList;
 
+import ssa.PhiInstruction;
+
 public class Program implements Element
 {
     private LinkedList<TypeDeclaration> types;
@@ -30,6 +32,29 @@ public class Program implements Element
     public LinkedList<Function> getFuncs()
     {
         return this.funcs;
+    }
+
+    public int instructionCount()
+    {
+        int count = 0; 
+
+        for (Function func : this.funcs)
+        {
+            for (Block block : func.getBlocks())
+            {
+                for (PhiInstruction phi : block.getPhis())
+                {
+                    count++;
+                }
+
+                for (Instruction inst : block.getInstructions())
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
     }
 
     public String llvm()

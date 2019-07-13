@@ -61,6 +61,8 @@ public class MiniCompiler {
          fw.write(llvmprog.llvm());
          fw.close();
 
+         //System.out.println("Instruciton Count: " + llvmprog.instructionCount());
+
          /* new File("./output").mkdir();
          String newFilename = "./output/" + args[0].replaceAll("\\./", "").replaceAll(".mini", ".ll").replaceAll("\\.\\./", "");
          
